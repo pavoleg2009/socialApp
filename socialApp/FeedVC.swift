@@ -10,10 +10,11 @@ import UIKit
 import Firebase
 import SwiftKeychainWrapper
 
-class FeedVC: UIViewController {
+class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     var currentUser: User!
     
+    @IBOutlet weak var tableVIew: UITableView!
     @IBOutlet weak var userLabelName: UILabel!
  
     
@@ -21,8 +22,23 @@ class FeedVC: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         userLabelName.text = currentUser.userName
+        
+        tableVIew.delegate = self
+        tableVIew.dataSource = self
     }
-
+    
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 3
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        return tableView.dequeueReusableCell(withIdentifier: "PostCell", for: indexPath) as! PostCell
+    }
     
     @IBAction func btmSignOutTapped(_ sender: Any) {
         
