@@ -25,6 +25,11 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         
         tableVIew.delegate = self
         tableVIew.dataSource = self
+        
+        DataService.ds.REF_POSTS.observe(.value, with: { (snapshot) in
+            print("=== \(snapshot.value)")
+        
+        })
     }
     
     
