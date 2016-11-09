@@ -18,6 +18,7 @@
 		284E5A821DD2901300561E7E /* RoundButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284E5A811DD2901300561E7E /* RoundButton.swift */; };
 		284E5A841DD291AE00561E7E /* MyTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284E5A831DD291AE00561E7E /* MyTextField.swift */; };
 		284E5A861DD2936C00561E7E /* MyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284E5A851DD2936C00561E7E /* MyButton.swift */; };
+		28D0B9791DD3893C007B6B25 /* CircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D0B9781DD3893C007B6B25 /* CircleView.swift */; };
 		28FB6BD31DD3516500905AF1 /* FeedVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28FB6BD21DD3516500905AF1 /* FeedVC.swift */; };
 		28FB6BD51DD3528200905AF1 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28FB6BD41DD3528200905AF1 /* User.swift */; };
 		9E9831C0F262976FCF450ED8 /* Pods_socialApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02116DFC890580F58A505A1C /* Pods_socialApp.framework */; };
@@ -39,6 +40,7 @@
 		284E5A831DD291AE00561E7E /* MyTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyTextField.swift; sourceTree = "<group>"; };
 		284E5A851DD2936C00561E7E /* MyButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyButton.swift; sourceTree = "<group>"; };
 		284E5A871DD2A73D00561E7E /* socialApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = socialApp.entitlements; sourceTree = "<group>"; };
+		28D0B9781DD3893C007B6B25 /* CircleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CircleView.swift; sourceTree = "<group>"; };
 		28FB6BD21DD3516500905AF1 /* FeedVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeedVC.swift; sourceTree = "<group>"; };
 		28FB6BD41DD3528200905AF1 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		52614673C6592353C206221C /* Pods-socialApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-socialApp.release.xcconfig"; path = "Pods/Target Support Files/Pods-socialApp/Pods-socialApp.release.xcconfig"; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 				284E5A811DD2901300561E7E /* RoundButton.swift */,
 				284E5A831DD291AE00561E7E /* MyTextField.swift */,
 				284E5A851DD2936C00561E7E /* MyButton.swift */,
+				28D0B9781DD3893C007B6B25 /* CircleView.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -282,6 +285,7 @@
 				284E5A821DD2901300561E7E /* RoundButton.swift in Sources */,
 				28FB6BD31DD3516500905AF1 /* FeedVC.swift in Sources */,
 				28FB6BD51DD3528200905AF1 /* User.swift in Sources */,
+				28D0B9791DD3893C007B6B25 /* CircleView.swift in Sources */,
 				284E5A7D1DD28D5100561E7E /* HeaderView.swift in Sources */,
 				284E5A661DD268AC00561E7E /* AppDelegate.swift in Sources */,
 				284E5A7F1DD28DE600561E7E /* Constants.swift in Sources */,

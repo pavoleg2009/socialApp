@@ -55,6 +55,15 @@ class SignInVC: UIViewController {
         }
     }
     
+    @IBAction func googleButtonTapped(_ sender: Any) {
+        
+        
+    }
+    
+    @IBAction func githubButtonTapped(_ sender: Any) {
+    }
+    
+    
     func firebaseAuth(_ credential: FIRAuthCredential) {
         FIRAuth.auth()?.signIn(with: credential, completion: { (user, error) in
             if error != nil {
