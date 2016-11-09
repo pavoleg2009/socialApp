@@ -96,7 +96,7 @@
                                         </constraints>
                                         <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="0.87" colorSpace="custom" customColorSpace="sRGB"/>
                                         <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="18"/>
-                                        <textInputTraits key="textInputTraits"/>
+                                        <textInputTraits key="textInputTraits" secureTextEntry="YES"/>
                                     </textField>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yt9-fP-iBZ" customClass="MyButton" customModule="socialApp" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="92" width="295" height="30"/>
@@ -105,9 +105,12 @@
                                             <constraint firstAttribute="height" constant="30" id="4IL-dC-M41"/>
                                         </constraints>
                                         <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="18"/>
-                                        <state key="normal" title="Button">
+                                        <state key="normal" title="Sign In">
                                             <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         </state>
+                                        <connections>
+                                            <action selector="signInTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="7dL-it-dh6"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                             </stackView>
@@ -131,6 +134,10 @@
                             <constraint firstItem="9iU-ml-s6T" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="uvR-9C-Lbk"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="emailText" destination="kqU-Za-kdf" id="Nrb-iJ-tPl"/>
+                        <outlet property="passwordText" destination="hJe-7H-bKV" id="BBM-6W-ziF"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
