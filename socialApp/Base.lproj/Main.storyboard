@@ -137,11 +137,63 @@
                     <connections>
                         <outlet property="emailText" destination="kqU-Za-kdf" id="Nrb-iJ-tPl"/>
                         <outlet property="passwordText" destination="hJe-7H-bKV" id="BBM-6W-ziF"/>
+                        <segue destination="ZOM-RK-zkT" kind="show" identifier="goToFeedVC" id="wbh-0N-HZQ"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="117.59999999999999" y="123.68815592203899"/>
+        </scene>
+        <!--FeedVC-->
+        <scene sceneID="dSP-iu-KIr">
+            <objects>
+                <viewController id="ZOM-RK-zkT" customClass="FeedVC" customModule="socialApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="8qy-ir-7qB"/>
+                        <viewControllerLayoutGuide type="bottom" id="vmL-hc-rNu"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="9SO-8w-ONo">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Hj1-02-LDk">
+                                <rect key="frame" x="16" y="323" width="343" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="21" id="H75-pk-08O"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hK0-Al-EAe">
+                                <rect key="frame" x="147.5" y="352" width="80" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="WOl-aU-m5E"/>
+                                    <constraint firstAttribute="width" constant="80" id="knQ-cl-ysA"/>
+                                </constraints>
+                                <state key="normal" title="Sign Out"/>
+                                <connections>
+                                    <action selector="btmSignOutTapped:" destination="ZOM-RK-zkT" eventType="touchUpInside" id="Fic-Ir-nPa"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" red="0.01176470588" green="0.66274509800000003" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstItem="Hj1-02-LDk" firstAttribute="leading" secondItem="9SO-8w-ONo" secondAttribute="leadingMargin" id="fa3-cX-lf7"/>
+                            <constraint firstItem="Hj1-02-LDk" firstAttribute="centerY" secondItem="9SO-8w-ONo" secondAttribute="centerY" id="mwa-wS-XXu"/>
+                            <constraint firstItem="hK0-Al-EAe" firstAttribute="centerX" secondItem="9SO-8w-ONo" secondAttribute="centerX" id="nFq-Gn-VCi"/>
+                            <constraint firstItem="hK0-Al-EAe" firstAttribute="top" secondItem="Hj1-02-LDk" secondAttribute="bottom" constant="8" id="v8y-Ur-Zih"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Hj1-02-LDk" secondAttribute="trailing" id="x9t-0e-fce"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="userLabelName" destination="Hj1-02-LDk" id="DsX-GX-FXp"/>
+                        <segue destination="BYZ-38-t0r" kind="show" identifier="goToSignInVC" id="EEp-eM-spu"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="5zf-WI-YZD" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="877.60000000000002" y="123.68815592203899"/>
         </scene>
     </scenes>
     <resources>

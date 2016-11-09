@@ -10,7 +10,7 @@ import UIKit
 import FBSDKCoreKit
 import FBSDKLoginKit
 import Firebase
-
+import SwiftKeychainWrapper
 
 class SignInVC: UIViewController {
 
@@ -20,6 +20,17 @@ class SignInVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        //if id present in keychain
+    
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        if let retrievedString: String = KeychainWrapper.standard.string(forKey: KEY_UID) {
+            print("=== Seage to FeedVC with retrievedString = \(retrievedString)")
+            performSegue(withIdentifier: "goToFeedVC", sender: User(userName:retrievedString))
+            
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -50,6 +61,10 @@ class SignInVC: UIViewController {
                 print("=== Unable to authenticate with Firebase - \(error)")
             } else {
                 print("=== Successfully authenticated with Firebase")
+                if let user = user {
+                    self.completeSignIn(id: user.uid)
+                }
+                
             }
         })
     }
@@ -60,6 +75,9 @@ class SignInVC: UIViewController {
             FIRAuth.auth()?.signIn(withEmail: email, password: pwd, completion: { (user, error) in
                 if error == nil {
                     print("=== User Successfully authenticated with Email")
+                    if let user = user {
+                        self.completeSignIn(id: user.uid)
+                    }
                     
                 } else {
                     FIRAuth.auth()?.createUser(withEmail: email, password: pwd, completion: { (user, error) in
@@ -67,11 +85,36 @@ class SignInVC: UIViewController {
                             print("=== Unable to authenticate in Firebase with email")
                         } else {
                             print("=== Successfully with Firebase")
+                            if let user = user {
+                                self.completeSignIn(id: user.uid)
+                            }
                         }
                     })
                 }
             })
         }
     }
+    
+    func completeSignIn(id: String) {
+        if KeychainWrapper.standard.set(id, forKey: KEY_UID) {
+            print("=== ID Saved to keychain")
+            performSegue(withIdentifier: "goToFeedVC", sender: User(userName:id))
+        } else {
+            print("=== ERROR saving ID to keychain")
+        }
+        
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "goToFeedVC" {
+            if let feedVC = segue.destination as? FeedVC {
+                if let user = sender as? User {
+                    feedVC.currentUser = user
+                }
+            }
+        }
+    }
+    
+
 }
 
