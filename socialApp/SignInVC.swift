@@ -71,7 +71,8 @@ class SignInVC: UIViewController {
             } else {
                 print("=== Successfully authenticated with Firebase")
                 if let user = user {
-                    self.completeSignIn(id: user.uid)
+                    let userData = ["provider": credential.provider]
+                    self.completeSignIn(id: user.uid, userData: userData)
                 }
                 
             }
@@ -85,7 +86,8 @@ class SignInVC: UIViewController {
                 if error == nil {
                     print("=== User Successfully authenticated with Email")
                     if let user = user {
-                        self.completeSignIn(id: user.uid)
+                        let userData = ["provider": user.providerID]
+                        self.completeSignIn(id: user.uid, userData: userData)
                     }
                     
                 } else {
@@ -95,7 +97,8 @@ class SignInVC: UIViewController {
                         } else {
                             print("=== Successfully with Firebase")
                             if let user = user {
-                                self.completeSignIn(id: user.uid)
+                                let userData = ["provider": user.providerID]
+                                self.completeSignIn(id: user.uid, userData: userData)
                             }
                         }
                     })
@@ -104,10 +107,10 @@ class SignInVC: UIViewController {
         }
     }
     
-    func completeSignIn(id: String) {
+    func completeSignIn(id: String, userData: Dictionary<String, String>) {
+        DataService.ds.createFirebaseDBUser(uid: id, userData: userData)
         if KeychainWrapper.standard.set(id, forKey: KEY_UID) {
-            print("=== ID Saved to keychain")
-            performSegue(withIdentifier: "goToFeedVC", sender: User(userName:id))
+            performSegue(withIdentifier: "goToFeedVC", sender: User(userName: id))
         } else {
             print("=== ERROR saving ID to keychain")
         }
