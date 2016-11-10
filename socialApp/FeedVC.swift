@@ -16,10 +16,12 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     var posts = [Post]()
     var imagePicker: UIImagePickerController!
     static var imageCache: NSCache<NSString, UIImage> = NSCache()
+    var imageSelected = false
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var userLabelName: UILabel!
     @IBOutlet weak var addImageImage: CircleView!
+    @IBOutlet weak var captionField: UITextField!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -84,6 +86,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let image = info[UIImagePickerControllerEditedImage] as? UIImage {
             addImageImage.image = image
+            imageSelected = true
         } else {
             print("Invalid media selected")
         }
@@ -91,7 +94,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     @IBAction func btnSignOutTapped(_ sender: Any) {
-        let kcResult = KeychainWrapper.standard.remove(key: KEY_UID)
+        let _ = KeychainWrapper.standard.remove(key: KEY_UID)
         print("=== ID removed from KeyChain")
         try! FIRAuth.auth()?.signOut()
         print("=== LogOut from Firebase")
@@ -105,6 +108,35 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
     }
 
+    @IBAction func postButtonTapped(_ sender: Any) {
+        
+        guard let caption = captionField.text, caption != "" else {
+            print("=== Cation must be entered")
+            return
+        }
+        
+        guard let image = addImageImage.image, imageSelected == true else {
+            print("=== Image must be selected")
+            return
+        }
+        
+        if let imageDada = UIImageJPEGRepresentation(image, 0.2) {
+            
+            let imageUid = NSUUID().uuidString
+            let metadata = FIRStorageMetadata()
+            metadata.contentType = "image/jpeg"
+            
+            DataService.ds.REF_POST_IMAGES.child(imageUid).put(imageDada, metadata: metadata) { (metadata, error) in
+                if error != nil {
+                    print("=== Unable to upload image to Firebase Storage: \(error.debugDescription)")
+                } else {
+                    
+                    let downloadURL = metadata?.downloadURL()?.absoluteString
+                    print("=== Successfully upload image to Firebase Storage with URL: \(downloadURL)")
+                }
+            }
+        }
+    }
     
 
 
