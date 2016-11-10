@@ -119,7 +119,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uHG-lc-jQB" customClass="RoundButton" customModule="socialApp" customModuleProvider="target">
-                                        <rect key="frame" x="118" y="0.0" width="100" height="100"/>
+                                        <rect key="frame" x="117.5" y="0.0" width="100" height="100"/>
                                         <color key="backgroundColor" red="0.68162685632705688" green="0.23205280303955078" blue="0.17476779222488403" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="100" id="QwC-Ey-vtK"/>
@@ -249,6 +249,9 @@
                                                     <constraint firstAttribute="width" constant="49" id="RNU-Zu-uXk"/>
                                                     <constraint firstAttribute="height" constant="49" id="pd7-8r-Ps8"/>
                                                 </constraints>
+                                                <connections>
+                                                    <outletCollection property="gestureRecognizers" destination="adm-JH-por" appends="YES" id="0wL-4C-h5f"/>
+                                                </connections>
                                             </imageView>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Add a caption" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="a0G-8s-qcP">
                                                 <rect key="frame" x="55" y="0.0" width="217" height="49"/>
@@ -413,6 +416,7 @@
                         </variation>
                     </view>
                     <connections>
+                        <outlet property="addImageImage" destination="OCX-JP-Krj" id="JcM-5c-Jcd"/>
                         <outlet property="tableView" destination="8Tz-Ix-HFG" id="agM-aY-jRd"/>
                         <outlet property="userLabelName" destination="Hj1-02-LDk" id="DsX-GX-FXp"/>
                         <segue destination="BYZ-38-t0r" kind="show" identifier="goToSignInVC" id="EEp-eM-spu"/>
@@ -421,7 +425,12 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5zf-WI-YZD" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <tapGestureRecognizer id="UEP-0g-S1b">
                     <connections>
-                        <action selector="btmSignOutTapped:" destination="ZOM-RK-zkT" id="sHY-wc-NZ7"/>
+                        <action selector="btnSignOutTapped:" destination="ZOM-RK-zkT" id="rV5-h0-T6x"/>
+                    </connections>
+                </tapGestureRecognizer>
+                <tapGestureRecognizer id="adm-JH-por">
+                    <connections>
+                        <action selector="addImageTapped:" destination="ZOM-RK-zkT" id="0Z4-fA-ybO"/>
                     </connections>
                 </tapGestureRecognizer>
             </objects>
