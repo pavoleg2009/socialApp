@@ -15,6 +15,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     var currentUser: User!
     var posts = [Post]()
     var imagePicker: UIImagePickerController!
+    static var imageCache: NSCache<NSString, UIImage> = NSCache()
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var userLabelName: UILabel!
@@ -35,7 +36,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         DataService.ds.REF_POSTS.observe(.value, with: { (snapshot) in
             if let snapshot = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 for snap in snapshot {
-                    print("=== SNAP: \(snap)")
+                    //print("=== SNAP: \(snap)")
                     if let postDict = snap.value as? Dictionary<String, Any> {
                         let key = snap.key
                         let post = Post(postKey: key, postData: postDict)
@@ -62,8 +63,18 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         let post = posts[indexPath.row]
         
         if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell") as? PostCell {
-            cell.configureCell(post: post)
-            return cell
+            
+//            var image: UIImage!
+            
+            if let image = FeedVC.imageCache.object(forKey: post.imageUrl as NSString) {
+                print("=== load image from cache")
+                cell.configureCell(post: post, img: image)
+                return cell
+            } else {
+                cell.configureCell(post: post)
+                return cell
+            }
+            
         } else {
             return PostCell()
         }

@@ -27,7 +27,7 @@ class SignInVC: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         if let retrievedString: String = KeychainWrapper.standard.string(forKey: KEY_UID) {
-            print("=== Seage to FeedVC with retrievedString = \(retrievedString)")
+            //print("=== Seage to FeedVC with retrievedString = \(retrievedString)")
             performSegue(withIdentifier: "goToFeedVC", sender: User(userName:retrievedString))
             
         }
