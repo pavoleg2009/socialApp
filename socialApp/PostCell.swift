@@ -9,6 +9,8 @@
 import UIKit
 
 class PostCell: UITableViewCell {
+    
+    var post: Post!
 
     @IBOutlet weak var profileImage: CircleView!
     @IBOutlet weak var userLbl: UILabel!
@@ -22,6 +24,13 @@ class PostCell: UITableViewCell {
         // Initialization code
     }
 
-    
+    func configureCell(post: Post) {
+        
+        self.caption.text = post.caption
+        self.likeLbl.text = "\(post.likes)"
+        
+        
+        
+    }
 
 }
