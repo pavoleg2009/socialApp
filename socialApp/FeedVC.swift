@@ -26,8 +26,8 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        userLabelName.text = currentUser.userName
-        
+//        userLabelName.text = currentUser.userName
+  //      print("=== currentUser.userName: \(currentUser.userName)")
         tableView.delegate = self
         tableView.dataSource = self
         
@@ -37,6 +37,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
         DataService.ds.REF_POSTS.observe(.value, with: { (snapshot) in
             if let snapshot = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                self.posts = []
                 for snap in snapshot {
                     //print("=== SNAP: \(snap)")
                     if let postDict = snap.value as? Dictionary<String, Any> {

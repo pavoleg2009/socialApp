@@ -12,6 +12,7 @@ class User {
     
     private var _userName: String!
     
+    
     var userName: String {
         if _userName == nil {
             _userName = ""

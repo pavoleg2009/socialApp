@@ -12,10 +12,10 @@ import FBSDKLoginKit
 import Firebase
 import SwiftKeychainWrapper
 
-class SignInVC: UIViewController {
+class LogInVC: UIViewController {
 
-    @IBOutlet weak var emailText: MyTextField!
-    @IBOutlet weak var passwordText: MyTextField!
+    @IBOutlet weak var emailField: MyTextField!
+    @IBOutlet weak var passwordField: MyTextField!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -67,7 +67,7 @@ class SignInVC: UIViewController {
     func firebaseAuth(_ credential: FIRAuthCredential) {
         FIRAuth.auth()?.signIn(with: credential, completion: { (user, error) in
             if error != nil {
-                print("=== Unable to authenticate with Firebase - \(error)")
+                print("!=== Error! Unable to authenticate with Firebase - \(error)")
             } else {
                 print("=== Successfully authenticated with Firebase")
                 if let user = user {
@@ -79,33 +79,42 @@ class SignInVC: UIViewController {
         })
     }
 
-    @IBAction func signInTapped(_ sender: Any) {
-        
-        if let email = emailText.text, let pwd = passwordText.text {
-            FIRAuth.auth()?.signIn(withEmail: email, password: pwd, completion: { (user, error) in
-                if error == nil {
-                    print("=== User Successfully authenticated with Email")
-                    if let user = user {
-                        let userData = ["provider": user.providerID]
-                        self.completeSignIn(id: user.uid, userData: userData)
-                    }
-                    
+    
+    
+    @IBAction func loginButtonTapped(_ sender: Any) {
+        if let email = emailField.text, let password = passwordField.text {
+            FIRAuth.auth()?.fetchProviders(forEmail: email, completion: { (providers, error) in
+                if error != nil {
+                    print("!=== Error fetching auth providers for email: \(email) ====: \(error.debugDescription)")
                 } else {
-                    FIRAuth.auth()?.createUser(withEmail: email, password: pwd, completion: { (user, error) in
-                        if error != nil {
-                            print("=== Unable to authenticate in Firebase with email")
-                        } else {
-                            print("=== Successfully with Firebase")
-                            if let user = user {
-                                let userData = ["provider": user.providerID]
-                                self.completeSignIn(id: user.uid, userData: userData)
+                    //
+                    if providers != nil {
+                        // loggin in with existing email user
+                        FIRAuth.auth()?.signIn(withEmail: email, password: password, completion: { (user, error) in
+                            if error == nil {
+                                print("=== User Successfully authenticated with Email")
+                                if let user = user {
+                                    let userData = ["provider": user.providerID]
+                                    self.completeSignIn(id: user.uid, userData: userData)
+                                }
+                                
+                            } else {
+                                print("!=== Error! during authenticating with email/password: \(error.debugDescription)")
                             }
-                        }
-                    })
+                        })
+                    } else {
+                        print("=== User (email) not found. Please check email or SignIn")
+                    }
                 }
             })
         }
     }
+
+    @IBAction func signInButtonTapped(_ sender: Any) {
+       performSegue(withIdentifier: "userProfileVC", sender: nil)
+        
+    }
+    
     
     func completeSignIn(id: String, userData: Dictionary<String, String>) {
         DataService.ds.createFirebaseDBUser(uid: id, userData: userData)
@@ -118,11 +127,18 @@ class SignInVC: UIViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "goToFeedVC" {
-            if let feedVC = segue.destination as? FeedVC {
-                if let user = sender as? User {
-                    feedVC.currentUser = user
-                }
+//        if segue.identifier == "goToFeedVC" {
+//            if let feedVC = segue.destination as? FeedVC {
+//                if let user = sender as? User {
+//                    feedVC.currentUser = user
+//                }
+//            }
+//        }
+        
+        if segue.identifier == "userProfileVC" {
+            //open UserProfileVC for adding new user
+            if let userProfileVC = segue.destination as? UserProfileVC {
+                userProfileVC.openedFor = .edit
             }
         }
     }
