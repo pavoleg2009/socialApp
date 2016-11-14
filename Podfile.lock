@@ -80,6 +80,7 @@ DEPENDENCIES:
   - Firebase/Core
   - Firebase/Database
   - Firebase/Storage
+  - Google/Core
   - Google/SignIn
   - SwiftKeychainWrapper
 
@@ -104,6 +105,6 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: a1f8ed39e4fe21c68957daed472c7afbcdf29166
   SwiftKeychainWrapper: 38952a3636320ae61bad3513cadd870929de7a4a
 
-PODFILE CHECKSUM: 9018170faf988faa6fb9d206244ec04ac67c90a7
+PODFILE CHECKSUM: 61d600e6898876592d383d04d9e6d8ab68ebe695
 
 COCOAPODS: 1.1.1

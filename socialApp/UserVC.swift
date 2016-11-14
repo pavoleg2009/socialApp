@@ -1,5 +1,5 @@
 //
-//  UserProfileVC.swift
+//  UserVC.swift
 //  socialApp
 //
 //  Created by Oleg Pavlichenkov on 11/11/2016.
@@ -9,10 +9,12 @@
 import UIKit
 import Firebase
 
-class UserProfileVC: UIViewController {
+class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     var user: User!
     var openedFor: OpenedFor = .insert
+    var imagePicker: UIImagePickerController!
+    var imageSelected = false
     
     let refreshAlert = UIAlertController(title: "Refresh", message: "All data will be lost.", preferredStyle: UIAlertControllerStyle.alert)
     
@@ -28,6 +30,9 @@ class UserProfileVC: UIViewController {
         super.viewDidLoad()
         
         //configureAlerts()
+        imagePicker = UIImagePickerController()
+        imagePicker.allowsEditing = true
+        imagePicker.delegate = self
         
         switch self.openedFor {
         case .edit:
@@ -40,6 +45,8 @@ class UserProfileVC: UIViewController {
         default:
             configureViewForInsert()
         }
+        
+        
     }
 
 
@@ -72,17 +79,17 @@ class UserProfileVC: UIViewController {
                         }
                     } else {
                         // providers == nil  => no such email in database - ADD NEW USER
-                        FIRAuth.auth()?.createUser(withEmail: email, password: password, completion: { (user, error) in
+                        FIRAuth.auth()?.createUser(withEmail: email, password: password, completion: { (gIdUser, error) in
                             if error != nil {
                                 print("=== Unable to authenticate in Firebase with email: \(error.debugDescription)")
                             } else {
                                 
-                                if let user = user {
-                                    let userData = ["provider": user.providerID]
-                                    print("=== User created with Email: \(email) and provider \(user.providerID)")
+                                if let gIdUser = gIdUser {
+                                    let userData = ["provider": gIdUser.providerID]
+                                    print("=== User created with Email: \(email) and provider \(gIdUser.providerID)")
                                     // - send to SignInVC
                                     
-                                    self.performSegue(withIdentifier: "ProfileVCToLogInVC", sender: nil)
+                                    self.performSegue(withIdentifier: "segueUserToLogInVC", sender: nil)
                                     //   self.completeSignIn(id: user.uid, userData: userData)
                                 }
                             }
@@ -117,12 +124,26 @@ class UserProfileVC: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
        //
         
-        if segue.identifier = "ProfileVCToLogInVC" {
+        if segue.identifier == "segueUserToLogInVC" {
             if let logInVC = segue.destination as? LogInVC {
-                LogInVC
+                //LogInVC
             }
         }
     }
     
+    @IBAction func userImageTapped(_ sender: Any) {
+        
+        present(imagePicker, animated: true, completion: nil)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        if let image = info[UIImagePickerControllerEditedImage] as? UIImage {
+            userImage.image = image
+            imageSelected = true
+        } else {
+            print("Invalid media selected")
+        }
+        imagePicker.dismiss(animated: true, completion: nil)
+    }
     
 }

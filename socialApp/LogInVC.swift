@@ -11,31 +11,45 @@ import FBSDKCoreKit
 import FBSDKLoginKit
 import Firebase
 import SwiftKeychainWrapper
+import GoogleSignIn
 
-class LogInVC: UIViewController {
+
+class LogInVC: UIViewController, GIDSignInUIDelegate {
 
     @IBOutlet weak var emailField: MyTextField!
     @IBOutlet weak var passwordField: MyTextField!
+//
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
         
-        //if id present in keychain
-    
+        
+        GIDSignIn.sharedInstance().uiDelegate = self
+        
+        FIRAuth.auth()?.addStateDidChangeListener { auth, user in
+            if let user = user {
+                // User is signed in.
+                
+                print("=== from viewDidLoad - user not nil: \(user.email)")
+                self.performSegue(withIdentifier: "segueLogInToFeedVC", sender: nil)
+            } else {
+                print("=== from viewDidLoad - LOGGED OUT\n")
+                // No user is signed in.
+              //  self.userEmailLabel.text = "no user logged"
+            }
+        }
+        
+ 
     }
     
     override func viewDidAppear(_ animated: Bool) {
         if let retrievedString: String = KeychainWrapper.standard.string(forKey: KEY_UID) {
-            //print("=== Seage to FeedVC with retrievedString = \(retrievedString)")
-            performSegue(withIdentifier: "goToFeedVC", sender: User(userName:retrievedString))
+           // print("=== Seage to FeedVC with retrievedString: \(retrievedString)")
+            performSegue(withIdentifier: "segueLogInToFeedVC", sender: nil  /* User(userName:retrievedString */)
             
+        } else {
+            //print(" === KeychainWrapper.standard.string(forKey: KEY_UID) = NIL ")
         }
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
 
     @IBAction func fbButtonTapped(_ sender: Any) {
@@ -43,11 +57,11 @@ class LogInVC: UIViewController {
         let facebookLogin = FBSDKLoginManager()
         facebookLogin.logIn(withReadPermissions: ["email"], from: self) { (result, error) in
             if error != nil {
-                print("=== Unable to auth with Facebook === \(error)")
+                print(" === Unable to auth with Facebook === \(error) ")
             } else if result?.isCancelled == true {
-                print("=== User cancelled Facebook auth")
+                print(" === User cancelled Facebook auth ")
             } else {
-                print("=== Successfully authenticated with Facebook")
+                print(" === Successfully authenticated with Facebook ")
                 let credential = FIRFacebookAuthProvider.credential(withAccessToken: FBSDKAccessToken.current().tokenString)
                 
                 self.firebaseAuth(credential)
@@ -56,7 +70,8 @@ class LogInVC: UIViewController {
     }
     
     @IBAction func googleButtonTapped(_ sender: Any) {
-        
+      //  sign(GIDSignIn!, didSignInFor: GIDGoogleUser!, withError: Error?)
+      
         
     }
     
@@ -65,14 +80,14 @@ class LogInVC: UIViewController {
     
     
     func firebaseAuth(_ credential: FIRAuthCredential) {
-        FIRAuth.auth()?.signIn(with: credential, completion: { (user, error) in
+        FIRAuth.auth()?.signIn(with: credential, completion: { (gIdUser, error) in
             if error != nil {
-                print("!=== Error! Unable to authenticate with Firebase - \(error)")
+                print(" !=== Error! Unable to authenticate with Firebase - \(error) ")
             } else {
-                print("=== Successfully authenticated with Firebase")
-                if let user = user {
+                print(" === Successfully authenticated with Firebase ")
+                if let gIdUser = gIdUser {
                     let userData = ["provider": credential.provider]
-                    self.completeSignIn(id: user.uid, userData: userData)
+                    self.completeSignIn(id: gIdUser.uid, userData: userData)
                 }
                 
             }
@@ -85,25 +100,26 @@ class LogInVC: UIViewController {
         if let email = emailField.text, let password = passwordField.text {
             FIRAuth.auth()?.fetchProviders(forEmail: email, completion: { (providers, error) in
                 if error != nil {
-                    print("!=== Error fetching auth providers for email: \(email) ====: \(error.debugDescription)")
+                    print(" !=== Error fetching auth providers for email: \(email) ====: \(error.debugDescription) ")
                 } else {
                     //
                     if providers != nil {
                         // loggin in with existing email user
-                        FIRAuth.auth()?.signIn(withEmail: email, password: password, completion: { (user, error) in
+                        FIRAuth.auth()?.signIn(withEmail: email, password: password, completion: { (gIdUser, error) in
                             if error == nil {
-                                print("=== User Successfully authenticated with Email")
-                                if let user = user {
-                                    let userData = ["provider": user.providerID]
-                                    self.completeSignIn(id: user.uid, userData: userData)
+                                print(" === User Successfully authenticated with Email ")
+                                if let gIdUser = gIdUser { // GIDGoogleUser!
+                                    let userData = ["provider": gIdUser.providerID]
+                                    self.completeSignIn(id: gIdUser.uid, userData: userData)
+
                                 }
                                 
                             } else {
-                                print("!=== Error! during authenticating with email/password: \(error.debugDescription)")
+                                print(" !=== Error! during authenticating with email/password: \(error.debugDescription) ")
                             }
                         })
                     } else {
-                        print("=== User (email) not found. Please check email or SignIn")
+                        print(" === User (email) not found. Please check email or SignIn ")
                     }
                 }
             })
@@ -111,7 +127,7 @@ class LogInVC: UIViewController {
     }
 
     @IBAction func signInButtonTapped(_ sender: Any) {
-       performSegue(withIdentifier: "userProfileVC", sender: nil)
+       performSegue(withIdentifier: "segueLogInToUserVC", sender: nil)
         
     }
     
@@ -119,30 +135,54 @@ class LogInVC: UIViewController {
     func completeSignIn(id: String, userData: Dictionary<String, String>) {
         DataService.ds.createFirebaseDBUser(uid: id, userData: userData)
         if KeychainWrapper.standard.set(id, forKey: KEY_UID) {
-            performSegue(withIdentifier: "goToFeedVC", sender: User(userName: id))
+            performSegue(withIdentifier: "segueLogInToFeedVC", sender: nil /*User(userName: id)*/)
         } else {
-            print("=== ERROR saving ID to keychain")
+            print(" === ERROR saving ID to keychain ")
         }
         
     }
+
+    
+
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-//        if segue.identifier == "goToFeedVC" {
-//            if let feedVC = segue.destination as? FeedVC {
+        if segue.identifier == "segueLogInToFeedVC" {
+            if let feedVC = segue.destination as? FeedVC {
 //                if let user = sender as? User {
 //                    feedVC.currentUser = user
+                
+                //print(" !!! === From LoginVC to FeedVC \n")
 //                }
-//            }
-//        }
+            }
+        }
         
-        if segue.identifier == "userProfileVC" {
+        if segue.identifier == "segueLogInToUserVC" {
             //open UserProfileVC for adding new user
-            if let userProfileVC = segue.destination as? UserProfileVC {
-                userProfileVC.openedFor = .edit
+            if let userProfileVC = segue.destination as? UserVC {
+                userProfileVC.openedFor = .insert
             }
         }
     }
     
+    //Google SignIn
+    
+    
+//    func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!, withError error: Error?) {
+//        print("=== 0 ")
+//        if let error = error {
+//            //self.showMessagePrompt(error.localizedDescription)
+//            print("=== 1 ")
+//            //return
+//        }
+//        print("=== 2 ")
+////        let authentication = user.authentication
+//        let credential = FIRGoogleAuthProvider.credential(withIDToken: (authentication?.idToken)!, accessToken: (authentication?.accessToken)!)
+//        // ...
+//        
+//        self.firebaseAuth(credential)
+        
+        
+ //   }
 
 }
 

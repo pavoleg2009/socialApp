@@ -46,15 +46,17 @@ class DataService {
         
         if let uid = KeychainWrapper.standard.string(forKey: KEY_UID) {
             let user = REF_USERS.child(uid)
+            //print(" === user \(user) ")
             return user
 
         } else {
-            print("=== No such record in KeyChain")
+            print(" === No such record in KeyChain ")
             return FIRDatabaseReference()
         }
     }
     
     func createFirebaseDBUser(uid: String, userData: Dictionary<String, String>) {
+        
         REF_USERS.child(uid).updateChildValues(userData)
     }
     

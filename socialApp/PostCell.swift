@@ -15,7 +15,7 @@ class PostCell: UITableViewCell {
     var likesRef: FIRDatabaseReference!
 
 
-    @IBOutlet weak var profileImage: CircleView!
+    ///@IBOutlet weak var profileImage: CircleView!
     @IBOutlet weak var userLbl: UILabel!
     @IBOutlet weak var postImage: UIImageView!
    
@@ -42,6 +42,7 @@ class PostCell: UITableViewCell {
     func configureCell(post: Post, img: UIImage? = nil) {
         self.post = post
         self.likesRef = DataService.ds.REF_USER_CURRENT.child("likes").child(post.postKey)
+        //print(" === self.likesRef: \(self.likesRef)")
         self.caption.text = post.caption
         self.likeLbl.text = "\(post.likes)"
         
@@ -52,9 +53,9 @@ class PostCell: UITableViewCell {
             let ref = FIRStorage.storage().reference(forURL: post.imageUrl)
             ref.data(withMaxSize: 2 * 1024 * 1024 /* 2 Megabytes*/, completion: { (data, error) in
                 if error != nil {
-                    print("=== Unable to download image from Firebase storage: \(error.debugDescription)")
+                    //print(" === Unable to download image from Firebase storage: \(error.debugDescription) ")
                 } else {
-                    print("=== Image downloaded from Firebase storage")
+                    //print(" === Image downloaded from Firebase storage" )
                     if let imgData = data {
                         if let img = UIImage(data: imgData) {
                             self.postImage.image = img
@@ -71,13 +72,10 @@ class PostCell: UITableViewCell {
         
             if let _ = snapshot.value as? NSNull {
                 self.likeImage.image = UIImage(named: "empty-heart")
-
             } else {
                 self.likeImage.image = UIImage(named: "filled-heart")
-
             }
         })
-        
     }
     
     func likeTapped(sender: UITapGestureRecognizer) {

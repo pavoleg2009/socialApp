@@ -23,11 +23,13 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     @IBOutlet weak var addImageImage: CircleView!
     @IBOutlet weak var captionField: UITextField!
     
+    @IBOutlet weak var userEmailLabel: UILabel!
+    @IBOutlet weak var displayNameLabel: UILabel!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-//        userLabelName.text = currentUser.userName
-  //      print("=== currentUser.userName: \(currentUser.userName)")
+
         tableView.delegate = self
         tableView.dataSource = self
         
@@ -39,7 +41,6 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             if let snapshot = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 self.posts = []
                 for snap in snapshot {
-                    //print("=== SNAP: \(snap)")
                     if let postDict = snap.value as? Dictionary<String, Any> {
                         let key = snap.key
                         let post = Post(postKey: key, postData: postDict)
@@ -50,6 +51,48 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             self.tableView.reloadData()
         })
         
+        DataService.ds.REF_USER_CURRENT.observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            if let _ = snapshot.value as? NSNull {
+                self.userEmailLabel.text = "123"
+            } else {
+                //self.userEmailLabel.text =
+                let snapDict = snapshot.value as? [String : AnyObject]
+                if let str = snapDict?["provider"] as? String {
+                    print(" === \(str) \n")
+                }
+                
+            }
+        })
+        
+        // listener for auth change (user login/logount)
+        FIRAuth.auth()?.addStateDidChangeListener { auth, user in
+            if let user = user {
+                // User is signed in.
+                
+                if let email = user.email {
+                    self.userEmailLabel.text = "\(email) / \(user.providerID)"
+                }
+                
+                if let displayName = user.displayName {
+                    self.displayNameLabel.text = displayName
+                }
+                
+                
+            } else {
+                // No user is signed in.
+                self.userEmailLabel.text = "no user logged"
+            }
+        }
+        
+        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        
+        if let user = currentUser {
+            userEmailLabel.text = user.userName
+        }
     }
     
     
@@ -66,11 +109,9 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         let post = posts[indexPath.row]
         
         if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell") as? PostCell {
-            
-//            var image: UIImage!
-            
+
             if let image = FeedVC.imageCache.object(forKey: post.imageUrl as NSString) {
-                print("=== load image from cache")
+                //print(" === load image from cache ")
                 cell.configureCell(post: post, img: image)
                 return cell
             } else {
@@ -89,35 +130,32 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             addImageImage.image = image
             imageSelected = true
         } else {
-            print("Invalid media selected")
+            print(" Invalid media selected ")
         }
         imagePicker.dismiss(animated: true, completion: nil)
     }
     
     @IBAction func btnSignOutTapped(_ sender: Any) {
         let _ = KeychainWrapper.standard.remove(key: KEY_UID)
-        print("=== ID removed from KeyChain")
+        print(" === ID removed from KeyChain ")
         try! FIRAuth.auth()?.signOut()
-        print("=== LogOut from Firebase")
-        performSegue(withIdentifier: "goToSignInVC", sender: nil)
+        print(" === LogOut from Firebase ")
+        performSegue(withIdentifier: "segueFeedToLoginVC", sender: nil)
     }
     
     @IBAction func addImageTapped(_ sender: Any) {
-        
         present(imagePicker, animated: true, completion: nil)
-        
-        
     }
 
     @IBAction func postButtonTapped(_ sender: Any) {
         
         guard let caption = captionField.text, caption != "" else {
-            print("=== Cation must be entered")
+            print(" === Cation must be entered ")
             return
         }
         
         guard let image = addImageImage.image, imageSelected == true else {
-            print("=== Image must be selected")
+            print(" === Image must be selected ")
             return
         }
         
@@ -129,15 +167,15 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             
             DataService.ds.REF_POST_IMAGES.child(imageUid).put(imageDada, metadata: metadata) { (metadata, error) in
                 if error != nil {
-                    print("=== Unable to upload image to Firebase Storage: \(error.debugDescription)")
+                    print(" === Unable to upload image to Firebase Storage: \(error.debugDescription) ")
                 } else {
                     
                     let downloadURL = metadata?.downloadURL()?.absoluteString
-                    print("=== Successfully upload image to Firebase Storage with URL: \(downloadURL)")
+                    print(" === Successfully upload image to Firebase Storage with URL: \(downloadURL) ")
                     if let url = downloadURL {
                         self.savePostToFirebase(imageUrl: url)
                     } else {
-                        print("=== Image URL is empty")
+                        print(" === Image URL is empty ")
                     }
                 }
             }
@@ -162,5 +200,22 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
     }
 
+    @IBAction func editUserButtonTapped(_ sender: Any) {
+        
+        performSegue(withIdentifier: "segueFeedToUserVC", sender: nil)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "segueFeedToUserVC" {
+            if let userVC = segue.destination as? UserVC {
+                userVC.user = currentUser
+                userVC.openedFor = .edit
+            }
+        }
+    }
 
+    @IBAction func testButtonClick(_ sender: Any) {
+        
+        
+    }
 }
