@@ -66,23 +66,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
         // Called when the application is about to terminate. Save data if appsourceApplicationropriate. See also applicationDidEnterBackground:.
     }
     
-//    func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
-//        
-//        return FBSDKApplicationDelegate.sharedInstance().application(application, open: url, sourceApplication: sourceApplication, annotation: annotation)
-//    }
-    
     func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
-        if url.absoluteString.range(of: "com.facebook") != nil {
-            print("=== facebook url\n")
-        } else if url.absoluteString.range(of: "com.google") != nil {
-            print("=== google url\n")
-
-        } else {
-            print("=== unknown url\n")
-        }
-        return FBSDKApplicationDelegate.sharedInstance().application(application, open: url, sourceApplication: sourceApplication, annotation: annotation)
         
+        return FBSDKApplicationDelegate.sharedInstance().application(application, open: url, sourceApplication: sourceApplication, annotation: annotation)
     }
+    
+//    func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
+//        if url.absoluteString.range(of: "com.facebook") != nil {
+//            print("=== facebook url\n")
+//        } else if url.absoluteString.range(of: "com.google") != nil {
+//            print("=== google url\n")
+//
+//        } else {
+//            print("=== unknown url\n")
+//        }
+//        return FBSDKApplicationDelegate.sharedInstance().application(application, open: url, sourceApplication: sourceApplication, annotation: annotation)
+//        
+//    }
 
 //    func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
 //        print("====2 \(url.absoluteString)]n")

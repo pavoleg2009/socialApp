@@ -54,10 +54,11 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         DataService.ds.REF_USER_CURRENT.observeSingleEvent(of: .value, with: { (snapshot) in
             
             if let _ = snapshot.value as? NSNull {
-                self.userEmailLabel.text = "123"
+                self.userEmailLabel.text = "snapshot.value as? NSNull"
             } else {
                 //self.userEmailLabel.text =
                 let snapDict = snapshot.value as? [String : AnyObject]
+                
                 if let str = snapDict?["provider"] as? String {
                     print(" === \(str) \n")
                 }
@@ -69,6 +70,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         FIRAuth.auth()?.addStateDidChangeListener { auth, user in
             if let user = user {
                 // User is signed in.
+                
                 
                 if let email = user.email {
                     self.userEmailLabel.text = "\(email) / \(user.providerID)"
@@ -90,9 +92,9 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     
     override func viewDidAppear(_ animated: Bool) {
         
-        if let user = currentUser {
-            userEmailLabel.text = user.userName
-        }
+//        if let user = currentUser {
+//            //userEmailLabel.text = user.userName
+//        }
     }
     
     
@@ -140,7 +142,8 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         print(" === ID removed from KeyChain ")
         try! FIRAuth.auth()?.signOut()
         print(" === LogOut from Firebase ")
-        performSegue(withIdentifier: "segueFeedToLoginVC", sender: nil)
+        //performSegue(withIdentifier: "segueFeedToLoginVC", sender: nil)
+        self.dismiss(animated: true, completion: nil)
     }
     
     @IBAction func addImageTapped(_ sender: Any) {
@@ -187,6 +190,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             "caption": captionField.text!,
             "imageUrl": imageUrl,
             "likes": 0
+            
         ]
         
         let firebasePost = DataService.ds.REF_POSTS.childByAutoId()
@@ -208,7 +212,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "segueFeedToUserVC" {
             if let userVC = segue.destination as? UserVC {
-                userVC.user = currentUser
+//                userVC.user = currentUser
                 userVC.openedFor = .edit
             }
         }

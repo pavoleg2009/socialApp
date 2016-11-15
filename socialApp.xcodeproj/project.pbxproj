@@ -97,7 +97,6 @@
 				284E5A791DD26F1000561E7E /* Controller */,
 				284E5A651DD268AC00561E7E /* AppDelegate.swift */,
 				284E5A6C1DD268AC00561E7E /* Assets.xcassets */,
-				284E5A6E1DD268AC00561E7E /* LaunchScreen.storyboard */,
 				284E5A711DD268AC00561E7E /* Info.plist */,
 				284E5A771DD2694C00561E7E /* GoogleService-Info.plist */,
 				284E5A801DD28DF200561E7E /* Utils */,
@@ -118,13 +117,14 @@
 		284E5A7A1DD26F1A00561E7E /* View */ = {
 			isa = PBXGroup;
 			children = (
-				284E5A691DD268AC00561E7E /* Main.storyboard */,
 				284E5A7C1DD28D5100561E7E /* HeaderView.swift */,
 				284E5A811DD2901300561E7E /* RoundButton.swift */,
 				284E5A831DD291AE00561E7E /* MyTextField.swift */,
 				284E5A851DD2936C00561E7E /* MyButton.swift */,
 				28D0B9781DD3893C007B6B25 /* CircleView.swift */,
 				28D0B97A1DD3AF9F007B6B25 /* PostCell.swift */,
+				284E5A691DD268AC00561E7E /* Main.storyboard */,
+				284E5A6E1DD268AC00561E7E /* LaunchScreen.storyboard */,
 			);
 			name = View;
 			sourceTree = "<group>";
