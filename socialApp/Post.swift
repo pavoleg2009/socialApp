@@ -16,6 +16,9 @@ class Post {
     private var _likes: Int!
     private var _postKey: String!
     private var _postRef: FIRDatabaseReference!
+    private var _authorKey: String!
+    private var _authorName: String!
+    private var _authorAvatarUrl: String!
     
     var caption: String {
         return _caption
@@ -31,6 +34,37 @@ class Post {
     
     var postKey: String {
         return _postKey
+    }
+    
+    var authorKey: String {
+        if _authorKey == nil {
+            _authorKey = ""
+        }
+        return _authorKey
+    }
+    
+    var authorName: String {
+        get {
+           if _authorName == nil {
+            _authorName = ""
+        }
+        return _authorName 
+        } set {
+            _authorName = newValue
+        }
+        
+    }
+    
+    var authorAvatarUrl: String {
+        get {
+            if _authorAvatarUrl == nil {
+                _authorAvatarUrl = ""
+            }
+            return _authorAvatarUrl
+        } set {
+            _authorAvatarUrl = newValue
+        }
+        
     }
     
     init(caption: String, imageUrl: String, likes: Int) {
@@ -56,6 +90,9 @@ class Post {
             self._likes = likes
         }
         
+        if let authorKey = postData["authorKey"]  as? String {
+            self._authorKey = authorKey
+        }
         _postRef = DataService.ds.REF_POSTS.child(_postKey)
         
     }

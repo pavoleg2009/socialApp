@@ -14,259 +14,154 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
     
     var currentUser: User!
     var openedFor: OpenedFor = .insert
+    
     var imagePicker: UIImagePickerController!
+    var avataSelectedOrChanged = false
     static var imageCache2: NSCache<NSString, UIImage> = NSCache()
-    var imageSelectedOrChanged = false
     
-    let refreshAlert = UIAlertController(title: "Refresh", message: "All data will be lost.", preferredStyle: UIAlertControllerStyle.alert)
+    var createdUser: FIRUser!
     
-    @IBOutlet weak var openForLabel: UILabel!
-    @IBOutlet weak var openForModeLabel: UILabel!
-    
-    @IBOutlet weak var userImage: UIImageView!
-    
+    @IBOutlet weak var userAvatarImage: CircleView!
     @IBOutlet weak var userNameField: MyTextField!
     @IBOutlet weak var emailField: MyTextField!
     @IBOutlet weak var passwordField: MyTextField! 
     @IBOutlet weak var confirmPasswordField: MyTextField!
-    
-    
     @IBOutlet weak var saveButton: MyButton!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        imagePicker = UIImagePickerController()
-        imagePicker.allowsEditing = true
-        imagePicker.delegate = self
+        setImagePicker()
+        currentUser = User()
         
-        loadCurrentUserData()
+        switch self.openedFor {
+        case .edit: // if view opened for editing existing user (with any auth provider)
+            loadCurrentUserData(){
+                self.configureUserViewForEdit()
+                self.loadUserAvatar() {}
+            }
+            
+        default: // if view opened for adding user
+            saveButton.setTitle("Sign In", for: [])
+            saveButton.addTarget(self, action: #selector(UserVC.signInTapped(_:)), for: .touchUpInside)
+        }
         
-      
+    
     }
-
-    func loadCurrentUserData() {
+//////////////////////////////////////////////////////////////
+// Loading User Data From Database
+//////////////////////////////////////////////////////////////
+    
+    func loadCurrentUserData(completion: @escaping() -> Void) {
+        
+        currentUser.userKey = DataService.ds.ID_USER_CURRENT
+        
         DataService.ds.REF_USER_CURRENT.observeSingleEvent(of: .value, with: { (snapshot) in
-            
-            self.currentUser = User()
-            
+  
             if let _ = snapshot.value as? NSNull {
-                print("=== REF_USER_CURRENT - snapshot not found")
+                print("=== User nof found in Users (REF_USER_CURRENT) - (snapshot = nil)")
             } else {
-                //self.userEmailLabel.text =
-                
+
                 let snapDict = snapshot.value as? [String : AnyObject]
-                
+
                 if let userName = snapDict?["userName"] as? String {
-                    //print(" === email = \(userName) \n")
                     self.currentUser.userName = userName
-                    self.userNameField.text = userName
                 }
                 
                 if let email = snapDict?["email"] as? String {
-                    //print(" === email = \(email) \n")
                     self.currentUser.email = email
-                    self.emailField.text = email
                 }
-                //                if let provider = snapDict?["provider"] as? String {
-                //                    //print(" === provider = \(provider) \n")
-                //                }
                 
-                //load image
+                if let provider = snapDict?["provider"] as? String {
+                    self.currentUser.provider = provider
+                }
+                
                 if let avatarUrl = snapDict?["avatarUrl"] as? String  {
-                    
-                    let ref = FIRStorage.storage().reference(forURL: avatarUrl)
-                    ref.data(withMaxSize: 2 * 1024 * 1024 /* 2 Megabytes*/, completion: { (data, error) in
-                        if error != nil {
-                            print(" === Unable to download image from Firebase storage: \(error.debugDescription) ")
-                        } else {
-                            print(" === Image downloaded from Firebase storage" )
-                            if let imgData = data {
-                                if let img = UIImage(data: imgData) {
-                                    self.userImage.image = img
-                                    UserVC.imageCache2.setObject(img, forKey: avatarUrl as NSString)
-                                }
-                            }
-                        }
-                    })
+                    self.currentUser.avatarUrl = avatarUrl
                 }
-                
             }
             
-            switch self.openedFor {
-            case .edit:
-                
-                if let user = self.currentUser { // где курент юзер долджен сконфигуриться?
-                    self.configureViewForEdit(user: user)
-                } else {
-                    print("=== No user for edit")
-                }
-                
-            default:
-                self.configureViewForInsert()
-            }
-            
+            completion()
         })
     }
     
-    
-    @IBAction func backButtonPressed(_ sender: Any) {
-        dismiss(animated: true)
+    func configureUserViewForEdit() {
+        userNameField.text = currentUser.userName
+        emailField.text = currentUser.email
+        saveButton.setTitle("Save", for: [])
+        saveButton.addTarget(self, action: #selector(UserVC.saveUserTapped(_:)), for: .touchUpInside)
     }
     
-    func configureViewForInsert() {
-        openForLabel.text = "Insert"
-        self.saveButton.setTitle("Sign In", for: [])
-        
-    }
-    
-    func configureViewForEdit(user: User) {
-        openForLabel.text = "Edit"
-        self.saveButton.setTitle("Save", for: [])
-    }
-    
-
-    @IBAction func signInButtonTapped(_ sender: Any) {
-        
-        if self.openedFor == .insert {
+    func loadUserAvatar(completion: @escaping() -> Void) {
+        if currentUser.avatarUrl != "" {
+            let ref = FIRStorage.storage().reference(forURL: currentUser.avatarUrl)
             
-            // Check user data entered for New User
-                // userName (not empty)
-                // email (not empty & correct format & user not exist
-                // password ( >= 8 characters, password = password confirm
-            
-            // If userName - ok && email - ok && password - ok ( radyToSave) =>
-            
-            //Save New user
-                // Create Auth User, if ok, get provider goto next
-                // If avatar selected - Save avatar to sorage, get link
-        
-            if let email = emailField.text , let password = passwordField.text, let userName = userNameField.text {
-                FIRAuth.auth()?.fetchProviders(forEmail: email, completion: { (providers, error) in
-                    if error != nil {
-                        print("=== Error fetching auth providers for email: \(email) ====: \(error.debugDescription)")
-                    } else {
-                        
-                        if providers != nil {
-                            print("=== Email already used for : \(email): ")
-                            for i in 0..<providers!.count {
-                                print("=== Provider #\(i): \(providers![i])")
-                            }
-                        } else {
-                            // providers == nil  => no such email in database - ADD NEW USER
-                            FIRAuth.auth()?.createUser(withEmail: email, password: password, completion: { (gIdUser, error) in
-                                if error != nil {
-                                    print("=== Unable to create user in Firebase with email: \(error.debugDescription)")
-                                } else {
-                                    
-                                    // === save avatar
-                                    
-                                    self.saveAvatarToStorage(temp: "", completion: { (success, avatarUrl) in
-                                        
-                                        if let gIdUser = gIdUser {
-                                            // === create data for new user
-                                            let userData = [
-                                                "email": email,
-                                                "provider": gIdUser.providerID,
-                                                "userName" : userName,
-                                                "avatarUrl" : avatarUrl!
-                                            ]
-                                            
-                                            self.completeSignIn(id: gIdUser.uid, userData: userData)
-                                            print("=== User created with Email: \(email) and provider \(gIdUser.providerID)")
-                                        }
-
-                                    })
-                                    
-                                    
-                                                                    }
-                            })
-
+            ref.data(withMaxSize: 2 * 1024 * 1024 /* 2 Megabytes*/, completion: { (data, error) in
+                if error != nil {
+                    print(" === Unable to download image from Firebase Data Storage: \(error.debugDescription) ")
+                } else {
+                    if let imgData = data {
+                        if let img = UIImage(data: imgData) {
+                            self.userAvatarImage.image = img
+                            UserVC.imageCache2.setObject(img, forKey: self.currentUser.avatarUrl as NSString)
                         }
-                        
                     }
-                })
-            }
-        } else if self.openedFor == .edit {
-            
-            // if email changed
-            // https://firebase.google.com/docs/auth/ios/manage-users
-            
-            // if password changed
-            // 
-            
-            // update User (not Auth)
-            
-            var userData = [
-            //    "email": email,
-            //    "provider": gIdUser.providerID,
-                "userName" : userNameField.text
-                
-            ]
-            
-            if imageSelectedOrChanged {
-                // remove old image from storage
-                // add new image to storage, return ref
-                print(" ===== 1")
-                
-                self.saveAvatarToStorage(temp: "", completion: { (success, avatarUrl) in
-                    print(" ===== 2")
-                    userData["avatarUrl"] = avatarUrl
-                    print(" ===== 3")
-                
-                
-                })
-                
-                print(" ===== 4")
-                
-                // add new image ref to userData
-             
-            }
-            
-            print(" ===== 5")
-            DataService.ds.REF_USER_CURRENT.updateChildValues(userData, withCompletionBlock: { (error, FIRDatabaseReference) in
-                print(" ===== 6")
-                print("==== currens user updated")
-                self.dismiss(animated: true, completion: nil)
+                }
+
             })
-            
-            
+        } else {
+            print("=== No user avatar URL assigned to user\n")
+        }
+        completion()
+    }
+
+//////////////////////////////////////////////////////////////
+// Creating New User
+//////////////////////////////////////////////////////////////
+    
+    @IBAction func signInTapped(_ sender: Any) {
+
+        if isEnteredDataValidForNewUser() {
+            createUserInFirebaseAuth(){
+                self.saveAvatarToStorage(){
+                    self.saveNewUserToDatabase()
+                    
+                }
+            }
         }
         
-        
-        // saving image to database
-        
-//        guard let image = userImage.image, imageSelectedOrChanged == true else {
-//            print(" === Image must be selected ")
-//            return
-//        }
-        
-//        if let imageDada = UIImageJPEGRepresentation(image, 0.2) {
-//            
-//            let imageUid = NSUUID().uuidString
-//            let metadata = FIRStorageMetadata()
-//            metadata.contentType = "image/jpeg"
-//            
-//            DataService.ds.REF_USER_AVARATS.child(imageUid).put(imageDada, metadata: metadata) { (metadata, error) in
-//                if error != nil {
-//                    print(" === Unable to upload image to Firebase Storage: \(error.debugDescription) ")
-//                } else {
-//                    
-//                    let downloadURL = metadata?.downloadURL()?.absoluteString
-//                    print(" === Successfully upload image to Firebase Storage with URL: \(downloadURL) ")
-//                    if let url = downloadURL {
-//                        //self.savePostToFirebase(imageUrl: url)
-//                    } else {
-//                        print(" === Image URL is empty ")
-//                    }
-//                }
-//            }
-//        }
-        // End of saving image to database
     }
-
-    func saveAvatarToStorage(temp: String, completion: @escaping (_ success: Bool, _ avatarUrl : String?) -> Void) {
-        guard let image = userImage.image, imageSelectedOrChanged == true else {
+    
+    func isEnteredDataValidForNewUser() -> Bool {
+        // userName (not empty)
+        // email (not empty & correct format & user not exist
+        // password ( >= 8 characters, password = password confirm
+        return true
+    }
+    
+    func createUserInFirebaseAuth(completion: @escaping () -> Void) {
+        FIRAuth.auth()?.createUser(withEmail: emailField.text!, password: passwordField.text!, completion: { (user, error) in
+            if error != nil {
+                print("=== Unable to create user in Firebase Auth with email: \(error.debugDescription)")
+                self.createdUser = nil
+            } else {
+                self.createdUser = user
+                self.createdUserToCurrentUser()
+            }
+            completion()
+        })
+        
+    }
+    
+    func createdUserToCurrentUser(){
+        currentUser.userKey = createdUser.uid
+        currentUser.provider = createdUser.providerID
+    }
+    
+    func saveAvatarToStorage(completion: @escaping () -> Void) {
+        guard let image = userAvatarImage.image, avataSelectedOrChanged == true else {
             print(" === Image must be selected ")
+            completion()
             return
         }
         
@@ -283,27 +178,36 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
                     
                     let downloadURL = metadata?.downloadURL()?.absoluteString
                     print(" === Successfully upload image to Firebase Storage with URL: \(downloadURL) ")
-                    if let url = downloadURL {
-                        completion(true, url)
-                        //self.savePostToFirebase(imageUrl: url)
-                    } else {
-                        print(" === Image URL is empty ")
-                        completion(false, "")
-                        
-                    }
+                    self.currentUser.avatarUrl = downloadURL!
                 }
+            completion()
             }
+        } else {
+            completion()
         }
-        // End of saving image to database
         
     }
     
+    func saveNewUserToDatabase(){
+        if let user = currentUser {
+            // === create data for new user
+            let userData = [
+                "email": emailField.text!,
+                "provider": user.provider,
+                "userName" : userNameField.text!,
+                "avatarUrl" : user.avatarUrl
+            ]
+            
+            self.completeSignIn(id: user.userKey, userData: userData)
+
+        }
+
+    }
+
     func completeSignIn(id: String, userData: Dictionary<String, String>) {
+        
         DataService.ds.createFirebaseDBUser(uid: id, userData: userData)
         if KeychainWrapper.standard.set(id, forKey: KEY_UID) {
-            
-            //go to FeedVC
-            //performSegue(withIdentifier: "segueUserToFeedVC", sender: nil /*User(userName: id)*/)
             self.dismiss(animated: true, completion: nil)
         } else {
             print(" === ERROR saving ID to keychain ")
@@ -311,22 +215,46 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
         
     }
     
+//////////////////////////////////////////////////////////////
+// Saving Changer User Info Database
+//////////////////////////////////////////////////////////////
 
-//    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-       //
-        
-//        if segue.identifier == "segueUserToLogInVC" {
-//            if let logInVC = segue.destination as? LogInVC {
-                //LogInVC
-//            }
-//        }
-//        if segue.identifier == "segueUserToFeedVC" {
-//            if let logInVC = segue.destination as? LogInVC {
-                //LogInVC
-//            }
-//        }
-//    }
+    func saveUserTapped(_ sender: Any) {
+        // https://firebase.google.com/docs/auth/ios/manage-users - add email and password change
+        if isEnteredDataValidForExistingUser() {
+            
+            self.saveAvatarToStorage(){  // also remove old avatar file
+                self.saveExistingUserToDatabase()
+                
+            }
+        }
+    }
     
+    func isEnteredDataValidForExistingUser() -> Bool {
+        // userName (not empty)
+        // email (not empty & correct format & not used by other user
+        // password ( >= 8 characters, password = password confirm
+        return true
+    }
+
+    func saveExistingUserToDatabase(){
+        if let user = currentUser {
+            // === create data for new user
+            let userData = [
+                "userName" : userNameField.text!,
+                "avatarUrl" : user.avatarUrl
+            ]
+            
+            self.completeSignIn(id: user.userKey, userData: userData)
+        }
+    }
+    
+//////////////////////////////////////////////////////////////
+//  Others
+//////////////////////////////////////////////////////////////
+
+
+   
     @IBAction func userImageTapped(_ sender: Any) {
         
         present(imagePicker, animated: true, completion: nil)
@@ -334,8 +262,8 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let image = info[UIImagePickerControllerEditedImage] as? UIImage {
-            userImage.image = image
-            imageSelectedOrChanged = true
+            userAvatarImage.image = image
+            avataSelectedOrChanged = true
         } else {
             print("Invalid media selected")
         }
@@ -343,49 +271,39 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
     }
 
     @IBAction func cancelButtonTapped(_ sender: Any) {
-        
         self.dismiss(animated: true, completion: nil)
-        
-//        DataService.ds.REF_USER_CURRENT.observeSingleEvent(of: .value, with: { (snapshot) in
-//            
-//            if let _ = snapshot.value as? NSNull {
-//                print("=== REF_USER_CURRENT - snapshot not founs")
-//            } else {
-//                //self.userEmailLabel.text =
-//                let snapDict = snapshot.value as? [String : AnyObject]
-        
-//                if let email = snapDict?["email"] as? String {
-//                    print(" === email = \(email) \n")
-//                }
-//                if let provider = snapDict?["provider"] as? String {
-//                    print(" === provider = \(provider) \n")
-//                }
-                
-//            }
- //       })
-        
-        
-    //
         
     }
     
-//===========================================================
-// UNSED
-//===========================================================
-    func configureAlerts() {
-        refreshAlert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
-            print("Handle Ok logic here")
-        }))
-        
-        refreshAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action: UIAlertAction!) in
-            print("Handle Cancel Logic here")
-        }))
+    func setImagePicker() {
+        imagePicker = UIImagePickerController()
+        imagePicker.allowsEditing = true
+        imagePicker.delegate = self
     }
-//===========================================================
+
+    @IBAction func backButtonPressed(_ sender: Any) {
+        dismiss(animated: true)
+    }
 }
 
 
 
-
+//            if let email = emailField.text , let password = passwordField.text, let userName = userNameField.text {
+//                FIRAuth.auth()?.fetchProviders(forEmail: email, completion: { (providers, error) in
+//                    if error != nil {
+//                        print("=== Error fetching auth providers for email: \(email) ====: \(error.debugDescription)")
+//                    } else {
+//                        if providers != nil {
+//                            print("=== Email already used for : \(email): ")
+//                            for i in 0..<providers!.count {
+//                                print("=== Provider #\(i): \(providers![i])")
+//                            }
+//                        } else {
+//                            // providers == nil  => no such email in database - ADD NEW USER
+//                        }
+//
+//                    }
+//                })
+//            }
 
 

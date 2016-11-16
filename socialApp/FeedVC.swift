@@ -43,6 +43,11 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
                 for snap in snapshot {
                     if let postDict = snap.value as? Dictionary<String, Any> {
                         let key = snap.key
+                        // read post author here - nope - in PostCell class
+                        
+                  //      DataService.ds.REF_USERS.child(<#T##pathString: String##String#>)
+                        
+                        
                         let post = Post(postKey: key, postData: postDict)
                         self.posts.append(post)
                     }
@@ -189,7 +194,8 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         let post: Dictionary<String, Any> = [
             "caption": captionField.text!,
             "imageUrl": imageUrl,
-            "likes": 0
+            "likes": 0,
+            "authorKey": DataService.ds.ID_USER_CURRENT
             
         ]
         
@@ -212,7 +218,6 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "segueFeedToUserVC" {
             if let userVC = segue.destination as? UserVC {
-//                userVC.user = currentUser
                 userVC.openedFor = .edit
             }
         }
