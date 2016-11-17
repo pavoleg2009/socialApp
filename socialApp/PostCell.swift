@@ -16,14 +16,17 @@ class PostCell: UITableViewCell {
 
 
     ///@IBOutlet weak var profileImage: CircleView!
-    @IBOutlet weak var userLbl: UILabel!
+
+    
+   
+    @IBOutlet weak var authorLabel: UILabel!
     @IBOutlet weak var postImage: UIImageView!
     
     @IBOutlet weak var userAvatarImage: CircleView!
     @IBOutlet weak var caption: UITextView!
     @IBOutlet weak var likeImage: UIImageView!
     
-    @IBOutlet weak var authorLabel: UILabel!
+
     @IBOutlet weak var likeLbl: UILabel!
 
     
@@ -88,6 +91,7 @@ class PostCell: UITableViewCell {
                     
                     //
                     //load image
+                    if authorAvatarUrl != "" {
 //                    if img != nil {
 //                        self.postImage.image = img
 //                    } else {
@@ -105,6 +109,9 @@ class PostCell: UITableViewCell {
                                 }
                             }
                         })
+                    } else {
+
+                    }
                  //   }
                     
                 } else {

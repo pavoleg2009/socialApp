@@ -191,12 +191,17 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
     func saveNewUserToDatabase(){
         if let user = currentUser {
             // === create data for new user
-            let userData = [
+            var userData = [
                 "email": emailField.text!,
                 "provider": user.provider,
                 "userName" : userNameField.text!,
-                "avatarUrl" : user.avatarUrl
+                
             ]
+            
+            if user.avatarUrl != "" {
+                userData["avatarUrl"] = user.avatarUrl
+            }
+                
             
             self.completeSignIn(id: user.userKey, userData: userData)
 
@@ -271,7 +276,7 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
     }
 
     @IBAction func cancelButtonTapped(_ sender: Any) {
-        self.dismiss(animated: true, completion: nil)
+        self.dismiss(animated: true)
         
     }
     

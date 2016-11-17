@@ -54,7 +54,12 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
                 }
             }
             self.tableView.reloadData()
+            
+            
+        }, withCancel: { (error) in
+            print("==== DB Error ====: \(error)")
         })
+
         
         DataService.ds.REF_USER_CURRENT.observeSingleEvent(of: .value, with: { (snapshot) in
             
@@ -172,7 +177,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             let imageUid = NSUUID().uuidString
             let metadata = FIRStorageMetadata()
             metadata.contentType = "image/jpeg"
-            
+
             DataService.ds.REF_POST_IMAGES.child(imageUid).put(imageDada, metadata: metadata) { (metadata, error) in
                 if error != nil {
                     print(" === Unable to upload image to Firebase Storage: \(error.debugDescription) ")
@@ -199,14 +204,26 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             
         ]
         
+        
         let firebasePost = DataService.ds.REF_POSTS.childByAutoId()
-        firebasePost.setValue(post)
+        // firebasePost.setValue(post) // change to setValue with permissions to handle permission error
         
-        captionField.text = ""
-        imageSelected = false
-        addImageImage.image = UIImage(named: "add-image")
+        firebasePost.setValue(post, withCompletionBlock: {(error, dbReference) in
+            if error != nil {
+                // error whily trying to save posr (permiossion or smth else)
+                print("==== Error while trying to save new post to DB: ==== \(error.debugDescription)\n")
+            } else {
+                // new post saved successfull
+                
+                self.captionField.text = ""
+                self.imageSelected = false
+                self.addImageImage.image = UIImage(named: "add-image")
+                
+                self.tableView.reloadData()
+            }
+            })
+       // firebasePost.setValue(Any?, withCompletionBlock: (Error?, FIRDatabaseReference) -> Void)
         
-        tableView.reloadData()
         
     }
 
