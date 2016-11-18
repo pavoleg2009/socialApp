@@ -24,6 +24,8 @@
 		28D0B9801DD3ECBD007B6B25 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D0B97F1DD3ECBD007B6B25 /* Post.swift */; };
 		28D0B9821DD51B70007B6B25 /* UserVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D0B9811DD51B70007B6B25 /* UserVC.swift */; };
 		28D0B9841DD52961007B6B25 /* OpenedFor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D0B9831DD52961007B6B25 /* OpenedFor.swift */; };
+		28D48FA11DDD4E9000C99672 /* PostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D48FA01DDD4E9000C99672 /* PostVC.swift */; };
+		28D48FA51DDDA78900C99672 /* MyCustomCellDelegator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D48FA41DDDA78900C99672 /* MyCustomCellDelegator.swift */; };
 		28FB6BD31DD3516500905AF1 /* FeedVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28FB6BD21DD3516500905AF1 /* FeedVC.swift */; };
 		28FB6BD51DD3528200905AF1 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28FB6BD41DD3528200905AF1 /* User.swift */; };
 		9E9831C0F262976FCF450ED8 /* Pods_socialApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02116DFC890580F58A505A1C /* Pods_socialApp.framework */; };
@@ -51,6 +53,8 @@
 		28D0B97F1DD3ECBD007B6B25 /* Post.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
 		28D0B9811DD51B70007B6B25 /* UserVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserVC.swift; sourceTree = "<group>"; };
 		28D0B9831DD52961007B6B25 /* OpenedFor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenedFor.swift; sourceTree = "<group>"; };
+		28D48FA01DDD4E9000C99672 /* PostVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostVC.swift; sourceTree = "<group>"; };
+		28D48FA41DDDA78900C99672 /* MyCustomCellDelegator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyCustomCellDelegator.swift; sourceTree = "<group>"; };
 		28FB6BD21DD3516500905AF1 /* FeedVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeedVC.swift; sourceTree = "<group>"; };
 		28FB6BD41DD3528200905AF1 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		52614673C6592353C206221C /* Pods-socialApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-socialApp.release.xcconfig"; path = "Pods/Target Support Files/Pods-socialApp/Pods-socialApp.release.xcconfig"; sourceTree = "<group>"; };
@@ -110,6 +114,7 @@
 				284E5A671DD268AC00561E7E /* LogInVC.swift */,
 				28FB6BD21DD3516500905AF1 /* FeedVC.swift */,
 				28D0B9811DD51B70007B6B25 /* UserVC.swift */,
+				28D48FA01DDD4E9000C99672 /* PostVC.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -151,6 +156,7 @@
 			children = (
 				28D0B97D1DD3CCB3007B6B25 /* DataService.swift */,
 				28D0B9831DD52961007B6B25 /* OpenedFor.swift */,
+				28D48FA41DDDA78900C99672 /* MyCustomCellDelegator.swift */,
 			);
 			name = Services;
 			sourceTree = "<group>";
@@ -308,10 +314,12 @@
 				28D0B97E1DD3CCB3007B6B25 /* DataService.swift in Sources */,
 				28D0B9801DD3ECBD007B6B25 /* Post.swift in Sources */,
 				284E5A821DD2901300561E7E /* RoundButton.swift in Sources */,
+				28D48FA11DDD4E9000C99672 /* PostVC.swift in Sources */,
 				28FB6BD31DD3516500905AF1 /* FeedVC.swift in Sources */,
 				28FB6BD51DD3528200905AF1 /* User.swift in Sources */,
 				28D0B9841DD52961007B6B25 /* OpenedFor.swift in Sources */,
 				28D0B9791DD3893C007B6B25 /* CircleView.swift in Sources */,
+				28D48FA51DDDA78900C99672 /* MyCustomCellDelegator.swift in Sources */,
 				28D0B9821DD51B70007B6B25 /* UserVC.swift in Sources */,
 				284E5A7D1DD28D5100561E7E /* HeaderView.swift in Sources */,
 				28D0B97B1DD3AF9F007B6B25 /* PostCell.swift in Sources */,

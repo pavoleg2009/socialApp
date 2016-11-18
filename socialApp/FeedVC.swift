@@ -10,7 +10,7 @@ import UIKit
 import Firebase
 import SwiftKeychainWrapper
 
-class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, MyCustomCellDelegator {
     
     var currentUser: User!
     var posts = [Post]()
@@ -57,7 +57,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             
             
         }, withCancel: { (error) in
-            print("==== DB Error ====: \(error)")
+            print("==== DB Error ==!==: \(error)")
         })
 
         
@@ -117,20 +117,25 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
+
         let post = posts[indexPath.row]
         
+//        var postSegueOpener = makePostSeguer(forPost: post)
+        
         if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell") as? PostCell {
-
+            
+//            cell.editPostButton.addTarget(self, action: makePostEditSeguer(forPost: post), for: .touchUpInside)
+            
             if let image = FeedVC.imageCache.object(forKey: post.imageUrl as NSString) {
                 //print(" === load image from cache ")
                 cell.configureCell(post: post, img: image)
-                return cell
+                
             } else {
                 cell.configureCell(post: post)
-                return cell
+
             }
-            
+            cell.delegate = self
+            return cell
         } else {
             return PostCell()
         }
@@ -148,6 +153,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     @IBAction func btnSignOutTapped(_ sender: Any) {
+        
         let _ = KeychainWrapper.standard.remove(key: KEY_UID)
         print(" === ID removed from KeyChain ")
         try! FIRAuth.auth()?.signOut()
@@ -157,42 +163,45 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     @IBAction func addImageTapped(_ sender: Any) {
-        present(imagePicker, animated: true, completion: nil)
+        // present(imagePicker, animated: true, completion: nil)
+        performSegue(withIdentifier: "segueFeedToPostVC", sender: .insert as OpenedFor)
     }
 
     @IBAction func postButtonTapped(_ sender: Any) {
+        performSegue(withIdentifier: "segueFeedToPostVC", sender: .edit as OpenedFor)
         
-        guard let caption = captionField.text, caption != "" else {
-            print(" === Cation must be entered ")
-            return
-        }
         
-        guard let image = addImageImage.image, imageSelected == true else {
-            print(" === Image must be selected ")
-            return
-        }
-        
-        if let imageDada = UIImageJPEGRepresentation(image, 0.2) {
-            
-            let imageUid = NSUUID().uuidString
-            let metadata = FIRStorageMetadata()
-            metadata.contentType = "image/jpeg"
-
-            DataService.ds.REF_POST_IMAGES.child(imageUid).put(imageDada, metadata: metadata) { (metadata, error) in
-                if error != nil {
-                    print(" === Unable to upload image to Firebase Storage: \(error.debugDescription) ")
-                } else {
-                    
-                    let downloadURL = metadata?.downloadURL()?.absoluteString
-                    print(" === Successfully upload image to Firebase Storage with URL: \(downloadURL) ")
-                    if let url = downloadURL {
-                        self.savePostToFirebase(imageUrl: url)
-                    } else {
-                        print(" === Image URL is empty ")
-                    }
-                }
-            }
-        }
+//        guard let caption = captionField.text, caption != "" else {
+//            print(" === Cation must be entered ")
+//            return
+//        }
+//        
+//        guard let image = addImageImage.image, imageSelected == true else {
+//            print(" === Image must be selected ")
+//            return
+//        }
+//        
+//        if let imageDada = UIImageJPEGRepresentation(image, 0.2) {
+//            
+//            let imageUid = NSUUID().uuidString
+//            let metadata = FIRStorageMetadata()
+//            metadata.contentType = "image/jpeg"
+//
+//            DataService.ds.REF_POST_IMAGES.child(imageUid).put(imageDada, metadata: metadata) { (metadata, error) in
+//                if error != nil {
+//                    print(" === Unable to upload image to Firebase Storage: \(error.debugDescription) ")
+//                } else {
+//                    
+//                    let downloadURL = metadata?.downloadURL()?.absoluteString
+//                    print(" === Successfully upload image to Firebase Storage with URL: \(downloadURL) ")
+//                    if let url = downloadURL {
+//                        self.savePostToFirebase(imageUrl: url)
+//                    } else {
+//                        print(" === Image URL is empty ")
+//                    }
+//                }
+//            }
+//        }
     }
     
     func savePostToFirebase(imageUrl: String) {
@@ -238,10 +247,51 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
                 userVC.openedFor = .edit
             }
         }
+        
+        if segue.identifier == "segueFeedToPostVC" {
+            if let postVC = segue.destination as? PostVC {
+                if let post = sender as? Post {
+                    postVC.openedFor = .edit
+                    postVC.post = post
+                    print("=== \(post.caption)")
+                } else {
+                    postVC.openedFor = .insert
+                    print("=== New post")
+                }
+    
+            }
+        }
     }
 
     @IBAction func testButtonClick(_ sender: Any) {
         
         
     }
+    
+//    func editPostInPostVC() {
+//        //performSegue(withIdentifier: "segueFeedToUserVC", sender: nil)
+//        print("=== edit post: pergorm segue from cell")
+//    }
+//    
+//    func makePostEditSeguer(forPost post: Post) -> () -> Void {
+//        var currPost = post
+//        func postSeguer() -> Void {
+//        
+//            print("=== from segure for: \(post.caption)\n")
+//            performSegue(withIdentifier: "segueFeedToPostVC", sender: post)
+//            return
+//        }
+//        return postSeguer
+//    }
+//    
+    
+
+    
+    func callSegueFromCell(myData post: AnyObject) {
+        //try not to send self, just to avoid retain cycles(depends on how you handle the code on the next controller)
+        self.performSegue(withIdentifier: "segueFeedToPostVC", sender: post)
+        //print("=== \(post)")
+        
+    }
+    
 }

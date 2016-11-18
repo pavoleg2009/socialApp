@@ -9,7 +9,11 @@
 import UIKit
 import Firebase
 
+
+
 class PostCell: UITableViewCell {
+    
+    var delegate: MyCustomCellDelegator!
     
     var post: Post!
     var likesRef: FIRDatabaseReference!
@@ -28,6 +32,7 @@ class PostCell: UITableViewCell {
     
 
     @IBOutlet weak var likeLbl: UILabel!
+    @IBOutlet weak var editPostButton: UIButton!
 
     
     override func awakeFromNib() {
@@ -50,7 +55,8 @@ class PostCell: UITableViewCell {
         self.caption.text = post.caption
         self.likeLbl.text = "\(post.likes)"
         self.authorLabel.text = post.authorKey
-        
+      //  self.editPostButton.isHidden = post.authorKey != DataService.ds.ID_USER_CURRENT
+      //  print("==== post.authorKey = \(post.authorKey) ==== DataService.ds.ID_USER_CURRENT = \(DataService.ds.ID_USER_CURRENT)\n")
         //load image
         if img != nil {
             self.postImage.image = img
@@ -151,4 +157,14 @@ class PostCell: UITableViewCell {
             }
         })
     }
+    
+    @IBAction func editPostButtonTapped(_ sender: Any) {
+        
+        if(self.delegate != nil){ //Just to be safe.
+            self.delegate.callSegueFromCell(myData: post as AnyObject)
+        }
+        
+    }
+
+
 }

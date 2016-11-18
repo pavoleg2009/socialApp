@@ -15,7 +15,9 @@ import GoogleSignIn
 
 
 class LogInVC: UIViewController, GIDSignInUIDelegate {
-
+    
+    var activeUser:FIRUser!
+    
     @IBOutlet weak var emailField: MyTextField!
     @IBOutlet weak var passwordField: MyTextField!
 //
@@ -29,12 +31,18 @@ class LogInVC: UIViewController, GIDSignInUIDelegate {
         
         FIRAuth.auth()?.addStateDidChangeListener { auth, user in
             if let user = user {
-                // User is signed in.
-                
-                print("=== from viewDidLoad - user not nil: \(user.email)")
+                // User is signed in. - why is it colled twice?
+                if !user.isEqual(self.activeUser) {
+                    self.activeUser = user
+                    print("=== FIRAuth.auth()?.addStateDidChangeListener: \(user.email!)\n")
                 self.performSegue(withIdentifier: "segueLogInToFeedVC", sender: nil)
+                }
+                
+                
+                
             } else {
-                print("=== from viewDidLoad - LOGGED OUT\n")
+                self.activeUser = nil
+                print("=== from viewDidLoad: user = nil (LOGGED OUT)\n")
                 // No user is signed in.
               //  self.userEmailLabel.text = "no user logged"
             }
@@ -45,8 +53,8 @@ class LogInVC: UIViewController, GIDSignInUIDelegate {
     
     override func viewDidAppear(_ animated: Bool) {
         if let retrievedString: String = KeychainWrapper.standard.string(forKey: KEY_UID) {
-           // print("=== Seage to FeedVC with retrievedString: \(retrievedString)")
-            performSegue(withIdentifier: "segueLogInToFeedVC", sender: nil  /* User(userName:retrievedString */)
+            //print("=== Seage to FeedVC with retrievedString: \(retrievedString)")
+           // performSegue(withIdentifier: "segueLogInToFeedVC", sender: nil  /* User(userName:retrievedString */)
             
         } else {
             //print(" === KeychainWrapper.standard.string(forKey: KEY_UID) = NIL ")
