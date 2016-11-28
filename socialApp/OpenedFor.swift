@@ -9,6 +9,6 @@
 import Foundation
 
 enum OpenedFor {
-    case insert
+    case create
     case edit
 }

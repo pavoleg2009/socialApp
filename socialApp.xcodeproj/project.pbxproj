@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		284E5A661DD268AC00561E7E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284E5A651DD268AC00561E7E /* AppDelegate.swift */; };
-		284E5A681DD268AC00561E7E /* LogInVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284E5A671DD268AC00561E7E /* LogInVC.swift */; };
+		284E5A681DD268AC00561E7E /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284E5A671DD268AC00561E7E /* LoginVC.swift */; };
 		284E5A6B1DD268AC00561E7E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 284E5A691DD268AC00561E7E /* Main.storyboard */; };
 		284E5A6D1DD268AC00561E7E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 284E5A6C1DD268AC00561E7E /* Assets.xcassets */; };
 		284E5A701DD268AC00561E7E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 284E5A6E1DD268AC00561E7E /* LaunchScreen.storyboard */; };
@@ -35,7 +35,7 @@
 		02116DFC890580F58A505A1C /* Pods_socialApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_socialApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		284E5A621DD268AC00561E7E /* socialApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = socialApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		284E5A651DD268AC00561E7E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		284E5A671DD268AC00561E7E /* LogInVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogInVC.swift; sourceTree = "<group>"; };
+		284E5A671DD268AC00561E7E /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		284E5A6A1DD268AC00561E7E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		284E5A6C1DD268AC00561E7E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		284E5A6F1DD268AC00561E7E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -111,7 +111,7 @@
 		284E5A791DD26F1000561E7E /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				284E5A671DD268AC00561E7E /* LogInVC.swift */,
+				284E5A671DD268AC00561E7E /* LoginVC.swift */,
 				28FB6BD21DD3516500905AF1 /* FeedVC.swift */,
 				28D0B9811DD51B70007B6B25 /* UserVC.swift */,
 				28D48FA01DDD4E9000C99672 /* PostVC.swift */,
@@ -308,7 +308,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				284E5A681DD268AC00561E7E /* LogInVC.swift in Sources */,
+				284E5A681DD268AC00561E7E /* LoginVC.swift in Sources */,
 				284E5A861DD2936C00561E7E /* MyButton.swift in Sources */,
 				284E5A841DD291AE00561E7E /* MyTextField.swift in Sources */,
 				28D0B97E1DD3CCB3007B6B25 /* DataService.swift in Sources */,
@@ -368,6 +368,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -417,6 +418,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -445,6 +447,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F049B96F4105CB231C795079 /* Pods-socialApp.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = socialApp/socialApp.entitlements;
 				DEVELOPMENT_TEAM = 4Y4DUJVCEZ;
@@ -460,6 +463,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 52614673C6592353C206221C /* Pods-socialApp.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = socialApp/socialApp.entitlements;
 				DEVELOPMENT_TEAM = 4Y4DUJVCEZ;

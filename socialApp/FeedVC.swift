@@ -12,11 +12,22 @@ import SwiftKeychainWrapper
 
 class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, MyCustomCellDelegator {
     
-    var currentUser: User!
     var posts = [Post]()
     var imagePicker: UIImagePickerController!
-    static var imageCache: NSCache<NSString, UIImage> = NSCache()
     var imageSelected = false
+    
+    private var authStateDidChangeListenerHandle: FIRAuthStateDidChangeListenerHandle!
+    var postsHandle: UInt!
+    var dbCurrentUserHandle: UInt!
+    
+    
+    
+    
+    /** @fn removeAuthStateDidChangeListener:
+     @brief Unregisters a block as an "auth state did change" listener.
+     @param listenerHandle The handle for the listener.
+     */
+    
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var userLabelName: UILabel!
@@ -29,84 +40,100 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        setAuthObservser(){ (userAutheticated) in
+            if userAutheticated {
+                print("===[FeedVC].viewWillAppear() : setAuthObservser() completion: User authenicated, continue init\n")
 
+                DataService.ds.readCurrentUserFromDatabase()
+                {
+                    self.setTableView()
+                    self.setImagePicker()
+                    self.setPostsObserver()
+                }
+                
+                
+            } else {
+                print("===[FeedVC].viewWillAppear() : setAuthObservser() completion: No user authenicated, go to loginVC\n")
+                self.performSegue(withIdentifier: "segueFeedToLoginVC", sender: nil)
+            }
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        print("==[FeedVC].viewWillDisappear : removeAuthStateDidChangeListener \n")
+        FIRAuth.auth()?.removeStateDidChangeListener(authStateDidChangeListenerHandle)
+    }
+    
+    func setTableView() {
         tableView.delegate = self
         tableView.dataSource = self
-        
+    }
+    
+    func setImagePicker() {
         imagePicker = UIImagePickerController()
         imagePicker.allowsEditing = true
         imagePicker.delegate = self
+    }
+    
+    func setAuthObservser(completion: @escaping (_ userAuthenticated: Bool) -> Void) { // listener for auth change (user login/logount)
         
-        DataService.ds.REF_POSTS.observe(.value, with: { (snapshot) in
+        authStateDidChangeListenerHandle = FIRAuth.auth()?.addStateDidChangeListener { auth, user in
+            
+            if let user = user { // User is signed in.
+
+                DataService.ds.currentFIRUser = user
+                DataService.ds.writeFIRUserDataToCurrenDBUser()
+                print("==[FeedVC].setAuthObservser() : User logged In n")
+                completion(true)
+                
+            } else {
+                // No user is signed in.
+                DataService.ds.currentFIRUser = nil
+                DataService.ds.currentDBUser = nil
+                print("==[FeedVC].setAuthObservser() : User logged Out/ not yet logged In: \n")
+                completion(false)
+                self.userEmailLabel.text = "No user logged / not yet logged in"
+            }
+        }
+    }
+
+    
+    func setPostsObserver() {
+        postsHandle = DataService.ds.REF_POSTS.observe(.value, with: { (snapshot) in
             if let snapshot = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 self.posts = []
                 for snap in snapshot {
                     if let postDict = snap.value as? Dictionary<String, Any> {
                         let key = snap.key
-                        // read post author here - nope - in PostCell class
-                        
-                  //      DataService.ds.REF_USERS.child(<#T##pathString: String##String#>)
-                        
-                        
                         let post = Post(postKey: key, postData: postDict)
                         self.posts.append(post)
                     }
                 }
             }
             self.tableView.reloadData()
-            
-            
         }, withCancel: { (error) in
-            print("==== DB Error ==!==: \(error)")
+            print("=== [FeedVC] DB Error (setupPostsObserver) ====: \(error)\n")
         })
-
-        
-        DataService.ds.REF_USER_CURRENT.observeSingleEvent(of: .value, with: { (snapshot) in
-            
-            if let _ = snapshot.value as? NSNull {
-                self.userEmailLabel.text = "snapshot.value as? NSNull"
-            } else {
-                //self.userEmailLabel.text =
-                let snapDict = snapshot.value as? [String : AnyObject]
-                
-                if let str = snapDict?["provider"] as? String {
-                    print(" === \(str) \n")
-                }
-                
-            }
-        })
-        
-        // listener for auth change (user login/logount)
-        FIRAuth.auth()?.addStateDidChangeListener { auth, user in
-            if let user = user {
-                // User is signed in.
-                
-                
-                if let email = user.email {
-                    self.userEmailLabel.text = "\(email) / \(user.providerID)"
-                }
-                
-                if let displayName = user.displayName {
-                    self.displayNameLabel.text = displayName
-                }
-                
-                
-            } else {
-                // No user is signed in.
-                self.userEmailLabel.text = "no user logged"
-            }
-        }
-        
         
     }
     
     override func viewDidAppear(_ animated: Bool) {
         
-//        if let user = currentUser {
-//            //userEmailLabel.text = user.userName
-//        }
+
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        //remove listeners
+        if let _ = postsHandle {
+            DataService.ds.REF_POSTS.removeObserver(withHandle: postsHandle)
+        print("====[FeedVC].viewDidDisappear : Posts observer removed\n")
+        }
+        
+    }
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -120,14 +147,9 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
 
         let post = posts[indexPath.row]
         
-//        var postSegueOpener = makePostSeguer(forPost: post)
-        
         if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell") as? PostCell {
-            
-//            cell.editPostButton.addTarget(self, action: makePostEditSeguer(forPost: post), for: .touchUpInside)
-            
-            if let image = FeedVC.imageCache.object(forKey: post.imageUrl as NSString) {
-                //print(" === load image from cache ")
+         
+            if let image = DataService.imageCache.object(forKey: post.imageUrl as NSString) {
                 cell.configureCell(post: post, img: image)
                 
             } else {
@@ -153,18 +175,17 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     @IBAction func btnSignOutTapped(_ sender: Any) {
-        
-        let _ = KeychainWrapper.standard.remove(key: KEY_UID)
-        print(" === ID removed from KeyChain ")
+        DataService.ds.currentDBUser = User()
+        KeychainWrapper.standard.removeObject(forKey: KEY_UID)
+        print("=== [FeedVC].btnSignOutTapped: ID removed from KeyChain \n")
         try! FIRAuth.auth()?.signOut()
-        print(" === LogOut from Firebase ")
-        //performSegue(withIdentifier: "segueFeedToLoginVC", sender: nil)
-        self.dismiss(animated: true, completion: nil)
+        print("=== [FeedVC].btnSignOutTapped:  LogOut from Firebase \n")
+
     }
     
     @IBAction func addImageTapped(_ sender: Any) {
         // present(imagePicker, animated: true, completion: nil)
-        performSegue(withIdentifier: "segueFeedToPostVC", sender: .insert as OpenedFor)
+        performSegue(withIdentifier: "segueFeedToPostVC", sender: .create as OpenedFor)
     }
 
     @IBAction func postButtonTapped(_ sender: Any) {
@@ -204,38 +225,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
 //        }
     }
     
-    func savePostToFirebase(imageUrl: String) {
-        let post: Dictionary<String, Any> = [
-            "caption": captionField.text!,
-            "imageUrl": imageUrl,
-            "likes": 0,
-            "authorKey": DataService.ds.ID_USER_CURRENT
-            
-        ]
-        
-        
-        let firebasePost = DataService.ds.REF_POSTS.childByAutoId()
-        // firebasePost.setValue(post) // change to setValue with permissions to handle permission error
-        
-        firebasePost.setValue(post, withCompletionBlock: {(error, dbReference) in
-            if error != nil {
-                // error whily trying to save posr (permiossion or smth else)
-                print("==== Error while trying to save new post to DB: ==== \(error.debugDescription)\n")
-            } else {
-                // new post saved successfull
-                
-                self.captionField.text = ""
-                self.imageSelected = false
-                self.addImageImage.image = UIImage(named: "add-image")
-                
-                self.tableView.reloadData()
-            }
-            })
-       // firebasePost.setValue(Any?, withCompletionBlock: (Error?, FIRDatabaseReference) -> Void)
-        
-        
-    }
-
+    
     @IBAction func editUserButtonTapped(_ sender: Any) {
         
         performSegue(withIdentifier: "segueFeedToUserVC", sender: nil)
@@ -253,10 +243,9 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
                 if let post = sender as? Post {
                     postVC.openedFor = .edit
                     postVC.post = post
-                    print("=== \(post.caption)")
                 } else {
-                    postVC.openedFor = .insert
-                    print("=== New post")
+                    postVC.openedFor = .create
+                    postVC.post = Post()
                 }
     
             }

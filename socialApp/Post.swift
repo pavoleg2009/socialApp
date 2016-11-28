@@ -25,12 +25,17 @@ class Post {
         return _caption
     }
     
-    var imageUrl: String {
-        return _imageUrl
+    var imageUrl: String { get {
+        return _imageUrl ?? ""
+        
+        } set {
+            _imageUrl = newValue
+        }
+        
     }
     
     var likes: Int {
-        return _likes
+        return _likes ?? 0
     }
     
     var postKey: String {
@@ -66,6 +71,11 @@ class Post {
             _authorAvatarUrl = newValue
         }
         
+    }
+    
+    init() {
+        
+        self._likes = 0
     }
     
     init(caption: String, imageUrl: String, likes: Int) {

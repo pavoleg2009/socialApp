@@ -16,6 +16,9 @@ let STORAGE_BASE = FIRStorage.storage().reference()
 class DataService {
     
     static let ds = DataService() // creates a singletone
+    var currentDBUser: User!
+    var currentFIRUser: FIRUser!
+    static var imageCache: NSCache<NSString, UIImage> = NSCache()
     
     //DB references
     private var _REF_BASE = DB_BASE
@@ -47,42 +50,203 @@ class DataService {
         return _REF_USER_AVATARS
     }
     
-    var REF_USER_CURRENT: FIRDatabaseReference {
+    var REF_USER_CURRENT: FIRDatabaseReference? {
+        // looking for current user ID
         
+        // 1. in local var currentDBUser: User!
+
+//!! << Facebook login failed here
+        
+//        if let key = currentDBUser.userKey, key != "" {
+//            print("====[DataService.ds].REF_USER_CURRENT: User read from Local currentDBUser.userKey \n")
+//            return REF_USERS.child(key)
+//        }
+        // 2. in KeyChain
+//        else
         if let uid = KeychainWrapper.standard.string(forKey: KEY_UID) {
-            let user = REF_USERS.child(uid)
-            //print(" === user \(user) ")
-            return user
+
+            print("====[DataService.ds].REF_USER_CURRENT: User read from KeyChain \n")
+            return REF_USERS.child(uid)
 
         } else {
-            print(" === No such record in KeyChain ")
-            return FIRDatabaseReference()
+            print("====[DataService.ds].REF_USER_CURRENT: ERROR: No uresId in currenUser and in KeyChain \n")
+            return FIRDatabaseReference() //nil
         }
     }
     
-    var ID_USER_CURRENT: String {
-        get {
-            if let uid = FIRAuth.auth()?.currentUser?.uid {
-                _ID_USER_CURRENT = uid
-            } else {
-                _ID_USER_CURRENT = ""
-            }
-
-            return _ID_USER_CURRENT
-            
-        } set {
-            _ID_USER_CURRENT = newValue
-        }
-    }
+////////////////////////////////////////////////
+//  CRud users in Firbase Database
+////////////////////////////////////////////////
     
-    var REF_AVATAR_DEFAULT: String {
-        return ""
-    }
-    
-    func createFirebaseDBUser(uid: String, userData: Dictionary<String, String>) {
+    func createFirebaseDBUser(uid: String, userData: Dictionary<String, Any>) {
         
         REF_USERS.child(uid).updateChildValues(userData)
-        //REF_USERS.child(uid)
+
+    }
+
+
+    func writeFIRUserDataToCurrenDBUser(){
+        // write
+        
+        if DataService.ds.currentDBUser == nil {
+            DataService.ds.currentDBUser = User()
+        }
+        
+        currentDBUser.userKey = currentFIRUser.uid
+        currentDBUser.provider = currentFIRUser.providerID
+        
+        if let email = currentFIRUser.email {
+            currentDBUser.email = email
+        }
+        
+//      may be add this to user data
+//        public var displayName: String? { get }
+//        public var photoURL: URL? { get }
+
     }
     
+    
+    // read user data from db/users/$uid/... for current autenticated user
+    // and save it to currentDBUser variable
+   
+    func readCurrentUserFromDatabase(completion: @escaping ()-> Void){
+//!! << Check if user authenticated, else set
+        REF_USER_CURRENT?.observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            if let _ = snapshot.value as? NSNull {
+                // promt error
+                print("====[.ds].readCurrentUserFromDatabase() : Error trying to get snapshor ffrom \\users. Snapshot is nil \n")
+            } else {
+                
+                if let snapDict = snapshot.value as? [String : AnyObject]{
+                    
+                    if DataService.ds.currentDBUser == nil {
+                        DataService.ds.currentDBUser = User()
+                    }
+                    
+                    print("====[FeedVC].setCurrentUserObserver() setting: .ds.currentDBUser\n")
+                    
+                    if let userName = snapDict["userName"] as? String {
+                        DataService.ds.currentDBUser.userName = userName
+                    }
+                    
+                    if let email = snapDict["email"] as? String {
+                        DataService.ds.currentDBUser.email = email
+                    }
+                    
+                    if let provider = snapDict["provider"] as? String {
+                        DataService.ds.currentDBUser.provider = provider
+                    }
+                    
+                    if let str = snapDict["avatarUrl"] as? String {
+                        DataService.ds.currentDBUser.avatarUrl = str
+                    }
+//!! WRONG: there in now userKey in snapShot
+                    if let userKey = snapDict["userKey"] as? String {
+                        DataService.ds.currentDBUser.userKey = userKey
+                    }
+                    
+                }
+            }
+            completion()
+        })
+
+        
+        completion()
+        
+    }
+    
+////////////////////////////////////////////////
+//  CRUD with Images at Firbase Storage
+////////////////////////////////////////////////
+    
+    public func createImageInStorage(image: UIImage?, ref: FIRStorageReference, completion: @escaping (_ createdImageURL: String?) -> Void) {
+        guard let image = image else {
+            print("=== From:  saveAvatarToStorage === Image is nul")
+            completion(nil)
+            return
+        }
+        
+        if let imageDada = UIImageJPEGRepresentation(image, 0.2) {
+            let imageUid = NSUUID().uuidString
+            let metadata = FIRStorageMetadata()
+            metadata.contentType = "image/jpeg"
+            
+            ref.child(imageUid).put(imageDada, metadata: metadata) { (metadata, error) in
+                if error != nil {
+                    print("====[ds.].saveImageToStorage:  Unable to upload image to Firebase Storage: \(error.debugDescription) ")
+                    completion(nil)
+                    return
+                } else {
+                    let downloadURL = metadata?.downloadURL()?.absoluteString
+                    print("===[ds.].saveImageToStorage:  Successfully upload image to Firebase Storage with URL: \(downloadURL) \n")
+                    completion(downloadURL)
+                    return
+                }
+                
+            }
+        } else {
+            completion(nil)
+            return
+        }
+    }
+
+    public func readImageFromStorage(imageUrl: String?, completion: @escaping (_ loadedImage: UIImage?) -> Void) {
+        
+        if let url = imageUrl, url != "" {
+            // check image in cache
+            if let image = DataService.imageCache.object(forKey: url as NSString) {
+                print("===[.ds].readImageFromStorage: Image loaded from cache\n")
+                completion(image)
+                return
+            } else {
+            // if no in cache - try load from FireStorage
+                let ref = FIRStorage.storage().reference(forURL: url)
+                ref.data(withMaxSize: 2 * 1024 * 1024 /* 2 Megabytes*/, completion: { (data, error) in
+                    if error != nil {
+                        print("====[.ds].readImageFromStorage: Unable to download image from Firebase storage: \(error.debugDescription) \n")
+                        completion(nil)
+                        return
+                    } else {
+                        print("===[.ds].readImageFromStorage: Image downloaded from Firebase storage\n" )
+                        if let imgData = data {
+                            if let img = UIImage(data: imgData) {
+
+                                DataService.imageCache.setObject(img, forKey: url as NSString)
+                                completion(img)
+                                return
+                            } else {
+                                print("====[.ds].readImageFromStorage: Can't cast Object in cache to UIImage \n" )
+                            }
+                        } else {
+                            print("====[.ds].readImageFromStorage: No data in specified url: <\(url)> \n" )
+                            completion(nil)
+                            return
+                        }
+                    }
+                })
+            }
+            
+        } else {
+            completion(nil)
+        }
+    }
+    
+    public func deleteImageFromStorage(imageUrl: String?) {
+        if let url = imageUrl, url != "" {
+            let ref = FIRStorage.storage().reference(forURL: url)
+            ref.delete { (error) -> Void in
+                if (error != nil) {
+                    // Uh-oh, an error occurred!
+                    print("====[.ds].deleteImageFromStorage:  ERROR on Firebase side:  \(error.debugDescription)\n")
+                } else {
+                    // File deleted successfully
+                    print("===[.ds].deleteImageFromStorage:  File deleted successfully\n")
+                }
+            }
+        } else {
+            print("====[.ds].deleteImageFromStorage:  ERROR: URL to delete is empty: \(imageUrl!)\n")
+        }
+    }
+
 }

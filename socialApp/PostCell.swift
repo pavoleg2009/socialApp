@@ -21,8 +21,6 @@ class PostCell: UITableViewCell {
 
     ///@IBOutlet weak var profileImage: CircleView!
 
-    
-   
     @IBOutlet weak var authorLabel: UILabel!
     @IBOutlet weak var postImage: UIImageView!
     
@@ -30,10 +28,8 @@ class PostCell: UITableViewCell {
     @IBOutlet weak var caption: UITextView!
     @IBOutlet weak var likeImage: UIImageView!
     
-
     @IBOutlet weak var likeLbl: UILabel!
     @IBOutlet weak var editPostButton: UIButton!
-
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -44,44 +40,52 @@ class PostCell: UITableViewCell {
         likeImage.addGestureRecognizer(tap)
         likeImage.isUserInteractionEnabled = true
         
-        
-        
+       
     }
 
     func configureCell(post: Post, img: UIImage? = nil) {
         self.post = post
-        self.likesRef = DataService.ds.REF_USER_CURRENT.child("likes").child(post.postKey)
-        //print(" === self.likesRef: \(self.likesRef)")
+        
+        if let userRef = DataService.ds.REF_USER_CURRENT {
+            self.likesRef = userRef.child("likes").child(post.postKey)
+        }
+        
         self.caption.text = post.caption
         self.likeLbl.text = "\(post.likes)"
         self.authorLabel.text = post.authorKey
-      //  self.editPostButton.isHidden = post.authorKey != DataService.ds.ID_USER_CURRENT
-      //  print("==== post.authorKey = \(post.authorKey) ==== DataService.ds.ID_USER_CURRENT = \(DataService.ds.ID_USER_CURRENT)\n")
+      //  self.editPostButton.isHidden = post.authorKey != DataService.ds.currentDBUser.userKey
+      //  print("==== post.authorKey = \(post.authorKey) ==== DataService.ds.currentDBUser.userKey = \(DataService.ds.currentDBUser.userKey)\n")
+        
         //load image
         if img != nil {
             self.postImage.image = img
         } else {
-            let ref = FIRStorage.storage().reference(forURL: post.imageUrl)
-            ref.data(withMaxSize: 2 * 1024 * 1024 /* 2 Megabytes*/, completion: { (data, error) in
-                if error != nil {
-                    //print(" === Unable to download image from Firebase storage: \(error.debugDescription) ")
-                } else {
-                    //print(" === Image downloaded from Firebase storage" )
-                    if let imgData = data {
-                        if let img = UIImage(data: imgData) {
-                            self.postImage.image = img
-                            FeedVC.imageCache.setObject(img, forKey: post.imageUrl as NSString)
+            
+            if post.imageUrl != "" {
+                let ref = FIRStorage.storage().reference(forURL: post.imageUrl)
+                ref.data(withMaxSize: 2 * 1024 * 1024 /* 2 Megabytes*/, completion: { (data, error) in
+                    if error != nil {
+                        print(" === Unable to download image from Firebase storage: \(error.debugDescription) ")
+                    } else {
+                        //print(" === Image downloaded from Firebase storage" )
+                        if let imgData = data {
+                            if let img = UIImage(data: imgData) {
+                                self.postImage.image = img
+                                DataService.imageCache.setObject(img, forKey: post.imageUrl as NSString)
+                            }
                         }
                     }
-                }
-            })
+                })
+            } else { // if no valid imageUrl
+                self.postImage.image = UIImage(named: "thumbnail-default")
+            }
         }
         
         // load author
         
         DataService.ds.REF_USERS.child("/\(post.authorKey)/").observeSingleEvent(of: .value, with: { snapshot in
             if let _ = snapshot.value as? NSNull {
-                print("=== User nof found in Users (REF_USER_CURRENT) - (snapshot = nil)")
+                print("=== User nof found in Users - (snapshot = nil)")
             } else {
                 let snapDict = snapshot.value as? [String : AnyObject]
                 if let authorName = snapDict?["userName"] as? String {
@@ -110,7 +114,7 @@ class PostCell: UITableViewCell {
                                 if let imgData = data {
                                     if let img = UIImage(data: imgData) {
                                         self.userAvatarImage.image = img
-                                        FeedVC.imageCache.setObject(img, forKey: post.imageUrl as NSString)
+                                        DataService.imageCache.setObject(img, forKey: authorAvatarUrl as NSString)
                                     }
                                 }
                             }

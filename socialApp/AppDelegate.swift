@@ -10,36 +10,21 @@ import UIKit
 import Firebase
 import FBSDKLoginKit
 import Google
-//import GGLSignIn
+
 import GoogleSignIn
 import SwiftKeychainWrapper
 
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
-    
 
-
+class AppDelegate: UIResponder, UIApplicationDelegate{
+ 
     var window: UIWindow?
 
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        
+
         FIRApp.configure()
-        
-        //CGLContext
-        
-        
-        GIDSignIn.sharedInstance().clientID = FIRApp.defaultApp()?.options.clientID
-        GIDSignIn.sharedInstance().delegate = self
-//        
-//        window = UIWindow(frame: UIScreen.main.bounds)
-//        let mainVC = LogInVC()
-//        let navController = UINavigationController(rootViewController: mainVC)
-//
-//        window?.rootViewController = navController;
-//        window?.makeKeyAndVisible()
+        DataService.ds.currentDBUser = User()
         
         return true
     }
@@ -71,82 +56,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
         return FBSDKApplicationDelegate.sharedInstance().application(application, open: url, sourceApplication: sourceApplication, annotation: annotation)
     }
     
-//    func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
-//        if url.absoluteString.range(of: "com.facebook") != nil {
-//            print("=== facebook url\n")
-//        } else if url.absoluteString.range(of: "com.google") != nil {
-//            print("=== google url\n")
-//
-//        } else {
-//            print("=== unknown url\n")
-//        }
-//        return FBSDKApplicationDelegate.sharedInstance().application(application, open: url, sourceApplication: sourceApplication, annotation: annotation)
-//        
-//    }
-
-//    func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
-//        print("====2 \(url.absoluteString)]n")
-//        
-//        if url.absoluteString.range(of: "com.facebook") != nil {
-//            //print("=== facebook url\n")
-//            
-//            
-//        } else if url.absoluteString.range(of: "com.google") != nil {
-//            print("=== google url\n")
-//            
-//        } else {
-//            print("=== unknown url\n")
-//        }
-//
-//        
-//        
-//        return GIDSignIn.sharedInstance().handle(
-//            url,
-//            sourceApplication: options[UIApplicationOpenURLOptionsKey.sourceApplication] as! String,
-//            annotation: options[UIApplicationOpenURLOptionsKey.annotation])
-//    }
-    
-    
-    public func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!, withError error: Error!) {
-        //Code
-        if let error = error {
-            print(" === \(error.localizedDescription)\n")
-            return
-        }
-        
-        // 
-        let authentication = user.authentication
-        let credential = FIRGoogleAuthProvider.credential(withIDToken: (authentication?.idToken)!, accessToken: (authentication?.accessToken)!)
-        
-        //print("=== Google Logged In \(credential.provider)")
-        FIRAuth.auth()?.signIn(with: credential, completion: { (gIdUser, error) in
-            if error != nil {
-                print(" !=== Error! Unable to authenticate with Firebase - \(error) ")
-            } else {
-                print(" === Successfully authenticated with Firebase ")
-                if let gIdUser = gIdUser {
-                    let userData = ["provider": credential.provider]
-                    DataService.ds.createFirebaseDBUser(uid: gIdUser.uid, userData: userData)
-                    if KeychainWrapper.standard.set(gIdUser.uid, forKey: KEY_UID) {
-                        //performSegue(withIdentifier: "segueLogInToFeedVC", sender: nil /*User(userName: id)*/)
-                    } else {
-                        print(" === ERROR saving ID to keychain ")
-                    }
-                }
-                
-            }
-        })
-
-        
-    }
-    
-    public func sign(_ signIn: GIDSignIn!, didDisconnectWith user:GIDGoogleUser!,
-                withError error: Error!) {
-        // Perform any operations when the user disconnects from app here.
-        // ...
-        print("=== Google SignOut")
-    }
-    
-
 }
 

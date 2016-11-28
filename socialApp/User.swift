@@ -17,11 +17,8 @@ class User {
     private var _avatarUrl: String!
     
     
-    var userKey: String {
+    var userKey: String? {
         get {
-            if _userKey == nil {
-                _userKey = ""
-            }
             return _userKey
         } set {
             _userKey = newValue

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11542" systemVersion="16B2555" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11542" systemVersion="16B2555" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="ZOM-RK-zkT">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -7,6 +7,7 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
         <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -72,7 +73,7 @@
                                 </connections>
                             </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="14" translatesAutoresizingMaskIntoConstraints="NO" id="2ZV-ju-awY">
-                                <rect key="frame" x="24" y="321" width="327" height="250"/>
+                                <rect key="frame" x="24" y="321" width="327" height="294"/>
                                 <subviews>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Username" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="PQW-br-o5N" customClass="MyTextField" customModule="socialApp" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="0.0" width="327" height="30"/>
@@ -135,6 +136,20 @@
                                             <action selector="cancelButtonTapped:" destination="5JA-Y7-ana" eventType="touchUpInside" id="Tpl-rG-Lne"/>
                                         </connections>
                                     </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ATO-P2-FPL" customClass="MyButton" customModule="socialApp" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="264" width="327" height="30"/>
+                                        <color key="backgroundColor" red="0.86666666670000003" green="0.17254901959999999" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="30" id="9t0-0X-rQr"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="18"/>
+                                        <state key="normal" title="Delete">
+                                            <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="deleteButtonTapped:" destination="5JA-Y7-ana" eventType="touchUpInside" id="TzC-IQ-yCn"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                             </stackView>
                         </subviews>
@@ -152,11 +167,13 @@
                     </view>
                     <connections>
                         <outlet property="confirmPasswordField" destination="yrW-QU-6fu" id="Hh6-IM-ZM3"/>
+                        <outlet property="deleteButton" destination="ATO-P2-FPL" id="yXR-GA-P5R"/>
                         <outlet property="emailField" destination="WGp-bI-5ZG" id="JE9-Lw-KFY"/>
                         <outlet property="passwordField" destination="8RO-tH-YHW" id="qIu-ZB-Sif"/>
                         <outlet property="saveButton" destination="Rgs-8G-Vfq" id="zZL-Cn-faM"/>
                         <outlet property="userAvatarImage" destination="DiR-0f-orJ" id="QQE-3w-POy"/>
                         <outlet property="userNameField" destination="PQW-br-o5N" id="cqC-1A-ROd"/>
+                        <outlet property="userVCCaptionLabel" destination="XIa-sL-c20" id="HMl-dn-qeF"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="T6J-DE-kgi" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -224,12 +241,16 @@
                                     <constraint firstAttribute="height" constant="65" id="vd4-Kl-pzg"/>
                                 </constraints>
                             </view>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="LMm-1y-bPD">
+                            <imageView clipsSubviews="YES" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="thumbnail-default" translatesAutoresizingMaskIntoConstraints="NO" id="LMm-1y-bPD">
                                 <rect key="frame" x="8" y="130" width="200" height="200"/>
+                                <gestureRecognizers/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="200" id="Eo1-b4-owv"/>
                                     <constraint firstAttribute="height" constant="200" id="WzN-NA-ox0"/>
                                 </constraints>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="nHk-qa-jm8" appends="YES" id="h2Y-2a-8pQ"/>
+                                </connections>
                             </imageView>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Add a caption" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="s7D-Uu-dEy">
                                 <rect key="frame" x="8" y="73" width="359" height="49"/>
@@ -286,19 +307,25 @@
                     </view>
                     <connections>
                         <outlet property="deleteButton" destination="FwC-Q3-sHr" id="HsU-ef-QU1"/>
-                        <outlet property="openedForLabel" destination="VwJ-md-le0" id="8SH-ZG-bYL"/>
                         <outlet property="postCaptionField" destination="s7D-Uu-dEy" id="w21-W7-Xfi"/>
                         <outlet property="postImage" destination="LMm-1y-bPD" id="IfD-7N-O7a"/>
+                        <outlet property="postVCCaptionLabel" destination="VwJ-md-le0" id="Nun-dJ-Vf6"/>
+                        <outlet property="saveButton" destination="C83-e3-AWz" id="0Yp-f0-RrZ"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Oed-Nh-xRg" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="nHk-qa-jm8">
+                    <connections>
+                        <action selector="imageTapped:" destination="shy-Ke-J3n" id="GC5-eG-pub"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="1880.8" y="123.68815592203899"/>
         </scene>
-        <!--Log InVC-->
+        <!--LoginVC-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="LogInVC" customModule="socialApp" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="LoginVC" customModule="socialApp" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -310,14 +337,19 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RHf-30-ajK" customClass="HeaderView" customModule="socialApp" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="150"/>
                                 <subviews>
-                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sOq-EZ-gpt">
-                                        <rect key="frame" x="67" y="11" width="240" height="128"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="sOq-EZ-gpt">
+                                        <rect key="frame" x="121" y="8" width="134" height="134"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" secondItem="sOq-EZ-gpt" secondAttribute="height" multiplier="1:1" id="oZl-bB-Dvy"/>
+                                        </constraints>
                                     </imageView>
                                 </subviews>
                                 <color key="backgroundColor" red="0.011764705882352941" green="0.66274509803921566" blue="0.95686274509803915" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
+                                    <constraint firstItem="sOq-EZ-gpt" firstAttribute="centerX" secondItem="RHf-30-ajK" secondAttribute="centerX" id="VO6-9Q-Akc"/>
+                                    <constraint firstItem="sOq-EZ-gpt" firstAttribute="top" secondItem="RHf-30-ajK" secondAttribute="top" constant="8" id="aP4-Ah-pkd"/>
                                     <constraint firstAttribute="height" constant="150" id="cDH-VB-TdN"/>
+                                    <constraint firstAttribute="bottom" secondItem="sOq-EZ-gpt" secondAttribute="bottom" constant="8" id="tm4-ob-B4l"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0wr-rY-HPb">
@@ -405,6 +437,12 @@
                                     <constraint firstAttribute="width" constant="117" id="FoL-uK-YCA"/>
                                     <constraint firstAttribute="height" constant="36" id="zGY-z9-reV"/>
                                 </constraints>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="FoL-uK-YCA"/>
+                                        <exclude reference="zGY-z9-reV"/>
+                                    </mask>
+                                </variation>
                             </view>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="14" translatesAutoresizingMaskIntoConstraints="NO" id="9iU-ml-s6T">
                                 <rect key="frame" x="40" y="405" width="295" height="162"/>
@@ -470,19 +508,23 @@
                             <constraint firstAttribute="trailing" secondItem="9iU-ml-s6T" secondAttribute="trailing" constant="40" id="Qcx-X8-BMW"/>
                             <constraint firstAttribute="trailingMargin" secondItem="5UK-aH-cVe" secondAttribute="trailing" id="Vd6-iE-57d"/>
                             <constraint firstItem="0wr-rY-HPb" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="Yek-AZ-tRs"/>
+                            <constraint firstItem="9iU-ml-s6T" firstAttribute="top" secondItem="ehA-k3-z5v" secondAttribute="bottom" constant="74" id="Z6F-a0-av6"/>
                             <constraint firstAttribute="trailing" secondItem="0wr-rY-HPb" secondAttribute="trailing" id="faV-6n-0SE"/>
                             <constraint firstItem="ehA-k3-z5v" firstAttribute="top" secondItem="5UK-aH-cVe" secondAttribute="bottom" constant="40" id="fcu-DB-d6q"/>
                             <constraint firstItem="RHf-30-ajK" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="h6s-2u-N9F"/>
-                            <constraint firstItem="9iU-ml-s6T" firstAttribute="top" secondItem="wX2-dz-vax" secondAttribute="bottom" constant="30" id="hPp-7S-y3T"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="0wr-rY-HPb" secondAttribute="bottom" id="o2N-n4-GVt"/>
                             <constraint firstItem="9iU-ml-s6T" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="40" id="rSq-ws-9Wv"/>
                             <constraint firstItem="5UK-aH-cVe" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="tXy-sT-AaB"/>
                         </constraints>
+                        <variation key="default">
+                            <mask key="subviews">
+                                <exclude reference="wX2-dz-vax"/>
+                            </mask>
+                        </variation>
                     </view>
                     <connections>
                         <outlet property="emailField" destination="kqU-Za-kdf" id="0Cn-Zg-WHt"/>
                         <outlet property="passwordField" destination="hJe-7H-bKV" id="dDF-VO-7bR"/>
-                        <segue destination="ZOM-RK-zkT" kind="show" identifier="segueLogInToFeedVC" id="wbh-0N-HZQ"/>
                         <segue destination="5JA-Y7-ana" kind="show" identifier="segueLogInToUserVC" id="aU9-mC-JEU"/>
                     </connections>
                 </viewController>
@@ -634,7 +676,7 @@
                                                                         </imageView>
                                                                     </subviews>
                                                                 </stackView>
-                                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="9wh-bG-ggk">
+                                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="9wh-bG-ggk">
                                                                     <rect key="frame" x="0.0" y="64" width="327" height="140"/>
                                                                 </imageView>
                                                                 <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="QX7-Iu-WER">
@@ -850,6 +892,7 @@
                         <outlet property="userLabelName" destination="Hj1-02-LDk" id="DsX-GX-FXp"/>
                         <segue destination="5JA-Y7-ana" kind="show" identifier="segueFeedToUserVC" id="qOI-hM-TIM"/>
                         <segue destination="shy-Ke-J3n" kind="show" identifier="segueFeedToPostVC" id="NDp-ch-kND"/>
+                        <segue destination="BYZ-38-t0r" kind="show" identifier="segueFeedToLoginVC" id="Mxf-q0-fJD"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5zf-WI-YZD" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -876,6 +919,7 @@
         <image name="empty-heart" width="70" height="70"/>
         <image name="f" width="352" height="328"/>
         <image name="sign-out" width="92" height="65"/>
+        <image name="thumbnail-default" width="622" height="415"/>
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="qOI-hM-TIM"/>
