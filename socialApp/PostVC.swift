@@ -78,7 +78,9 @@ class PostVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
         var postData: [String : Any] = [
             "caption" : postCaptionField.text!,
             "likes" : 0,
-            "authorKey" : DataService.ds.currentDBUser.userKey!
+            "authorKey" : DataService.ds.currentDBUser.userKey!,
+            "dateOfCreate": [".sv": "timestamp"],
+            "dateOfUpdate": [".sv": "timestamp"]
         ]
         
         if let url = postImageUrl, url != "" {
@@ -152,11 +154,13 @@ class PostVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
     func preparePostDataForUpdate(completion: @escaping(Dictionary<String, Any>?) -> Void) {
         //put data from UIControls to post
         
-        var postDataToUpdate: Dictionary<String, Any> = [:]
+        var postDataToUpdate: [String : Any] = [:]
         
         if postCaptionField.text != "" && postCaptionField.text != post.caption {
             postDataToUpdate["caption"] = postCaptionField.text!
         }
+        
+        postDataToUpdate["dateOfUpdate"] = [".sv": "timestamp"]
         
         if imageSelectedOrChanged {
            

@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "socialApp/UserVC.swift"
-            timestampString = "502063399.548029"
+            timestampString = "502116974.648514"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "173"
-            endingLineNumber = "173"
+            startingLineNumber = "174"
+            endingLineNumber = "174"
             landmarkName = "saveUserTapped(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -26,12 +26,91 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "socialApp/UserVC.swift"
-            timestampString = "502063399.548029"
+            timestampString = "502116974.648514"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "204"
-            endingLineNumber = "204"
+            startingLineNumber = "205"
+            endingLineNumber = "205"
             landmarkName = "saveExistingUserToDatabase(userAvatarUrl:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "socialApp/FeedVC.swift"
+            timestampString = "502129298.070167"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "131"
+            endingLineNumber = "131"
+            landmarkName = "setPostsObserver()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "socialApp.FeedVC.setPostsObserver () -&gt; ()"
+                  moduleName = "socialApp"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/olegpavlichenkov/Dropbox/__Learning/Udemy/iOS_Development/socialApp/socialApp/FeedVC.swift"
+                  timestampString = "502129341.76543"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "132"
+                  endingLineNumber = "132"
+                  offsetFromSymbolStart = "409">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "socialApp.FeedVC.(setPostsObserver () -&gt; ()).(closure #1)"
+                  moduleName = "socialApp"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/olegpavlichenkov/Dropbox/__Learning/Udemy/iOS_Development/socialApp/socialApp/FeedVC.swift"
+                  timestampString = "502129341.768313"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "132"
+                  endingLineNumber = "132"
+                  offsetFromSymbolStart = "601">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "socialApp.FeedVC.(setPostsObserver () -&gt; ()).(closure #2)"
+                  moduleName = "socialApp"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/olegpavlichenkov/Dropbox/__Learning/Udemy/iOS_Development/socialApp/socialApp/FeedVC.swift"
+                  timestampString = "502129341.772116"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "133"
+                  endingLineNumber = "133"
+                  offsetFromSymbolStart = "22">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "socialApp/FeedVC.swift"
+            timestampString = "502129298.070167"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "169"
+            endingLineNumber = "169"
+            landmarkName = "setUserObserver(completion:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

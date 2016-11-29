@@ -142,6 +142,7 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
 
     
     func configureUserVCForEdit() {
+        
         userVCCaptionLabel.text = "Edit User"
         userNameField.text = DataService.ds.currentDBUser.userName
         emailField.text = DataService.ds.currentDBUser.email

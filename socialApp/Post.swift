@@ -20,6 +20,8 @@ class Post {
     private var _authorKey: String!
     private var _authorName: String!
     private var _authorAvatarUrl: String!
+    private var _dateOfCreate: Date!
+    private var _dateOfUpdate: Date!
     
     var caption: String {
         return _caption
@@ -39,53 +41,55 @@ class Post {
     }
     
     var postKey: String {
-        return _postKey
+        return _postKey ?? ""
     }
     
     var authorKey: String {
-        if _authorKey == nil {
-            _authorKey = ""
-        }
-        return _authorKey
+        return _authorKey ?? ""
     }
     
     var authorName: String {
         get {
-           if _authorName == nil {
-            _authorName = ""
-        }
-        return _authorName 
+            return _authorName ?? ""
         } set {
             _authorName = newValue
         }
-        
     }
     
     var authorAvatarUrl: String {
         get {
-            if _authorAvatarUrl == nil {
-                _authorAvatarUrl = ""
-            }
-            return _authorAvatarUrl
+            return _authorAvatarUrl ?? ""
         } set {
             _authorAvatarUrl = newValue
         }
-        
+    }
+    
+    var dateOfCreate: Date { get {
+            return _dateOfCreate
+        } set {
+            _dateOfCreate = newValue
+        }
+    }
+
+    var dateOfUpdate: Date { get {
+        return _dateOfUpdate
+        } set {
+            _dateOfUpdate = newValue
+        }
     }
     
     init() {
-        
         self._likes = 0
     }
     
     init(caption: String, imageUrl: String, likes: Int) {
-        
+        // init for brand new post
         self._caption = caption
         self._imageUrl = imageUrl
         self._likes = likes
     }
     
-    init(postKey: String, postData: Dictionary<String, Any>) {
+    init(postKey: String, postData: [String : Any]) {
         
         self._postKey = postKey
         
@@ -104,6 +108,15 @@ class Post {
         if let authorKey = postData["authorKey"]  as? String {
             self._authorKey = authorKey
         }
+        
+        if let dateOfCreate = postData["dateOfCreate"]  as? TimeInterval {
+            self._dateOfCreate = Date(timeIntervalSince1970: dateOfCreate/1000)
+        }
+        
+        if let dateOfUpdate = postData["dateOfUpdate"]  as? TimeInterval {
+            self._dateOfUpdate = Date(timeIntervalSince1970: dateOfUpdate/1000)
+        }
+        
         _postRef = DataService.ds.REF_POSTS.child(_postKey)
         
     }

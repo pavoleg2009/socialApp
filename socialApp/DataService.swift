@@ -84,7 +84,6 @@ class DataService {
 
     }
 
-
     func writeFIRUserDataToCurrenDBUser(){
         // write
         
@@ -110,11 +109,9 @@ class DataService {
     // and save it to currentDBUser variable
    
     func readCurrentUserFromDatabase(completion: @escaping ()-> Void){
-//!! << Check if user authenticated, else set
         REF_USER_CURRENT?.observeSingleEvent(of: .value, with: { (snapshot) in
             
             if let _ = snapshot.value as? NSNull {
-                // promt error
                 print("====[.ds].readCurrentUserFromDatabase() : Error trying to get snapshor ffrom \\users. Snapshot is nil \n")
             } else {
                 
@@ -124,34 +121,25 @@ class DataService {
                         DataService.ds.currentDBUser = User()
                     }
                     
-                    print("====[FeedVC].setCurrentUserObserver() setting: .ds.currentDBUser\n")
-                    
                     if let userName = snapDict["userName"] as? String {
-                        DataService.ds.currentDBUser.userName = userName
+                        self.currentDBUser.userName = userName
                     }
                     
                     if let email = snapDict["email"] as? String {
-                        DataService.ds.currentDBUser.email = email
+                        self.currentDBUser.email = email
                     }
                     
                     if let provider = snapDict["provider"] as? String {
-                        DataService.ds.currentDBUser.provider = provider
+                        self.currentDBUser.provider = provider
                     }
                     
                     if let str = snapDict["avatarUrl"] as? String {
-                        DataService.ds.currentDBUser.avatarUrl = str
+                        self.currentDBUser.avatarUrl = str
                     }
-//!! WRONG: there in now userKey in snapShot
-                    if let userKey = snapDict["userKey"] as? String {
-                        DataService.ds.currentDBUser.userKey = userKey
-                    }
-                    
                 }
             }
             completion()
         })
-
-        
         completion()
         
     }
@@ -162,7 +150,7 @@ class DataService {
     
     public func createImageInStorage(image: UIImage?, ref: FIRStorageReference, completion: @escaping (_ createdImageURL: String?) -> Void) {
         guard let image = image else {
-            print("=== From:  saveAvatarToStorage === Image is nul")
+            print("===[.ds].createImageInStorage() : No image (nil) passed to save")
             completion(nil)
             return
         }
@@ -174,12 +162,11 @@ class DataService {
             
             ref.child(imageUid).put(imageDada, metadata: metadata) { (metadata, error) in
                 if error != nil {
-                    print("====[ds.].saveImageToStorage:  Unable to upload image to Firebase Storage: \(error.debugDescription) ")
+                    print("====[ds.].saveImageToStorage() :  Unable to upload image to Firebase Storage: \(error.debugDescription) ")
                     completion(nil)
                     return
                 } else {
                     let downloadURL = metadata?.downloadURL()?.absoluteString
-                    print("===[ds.].saveImageToStorage:  Successfully upload image to Firebase Storage with URL: \(downloadURL) \n")
                     completion(downloadURL)
                     return
                 }
@@ -196,7 +183,7 @@ class DataService {
         if let url = imageUrl, url != "" {
             // check image in cache
             if let image = DataService.imageCache.object(forKey: url as NSString) {
-                print("===[.ds].readImageFromStorage: Image loaded from cache\n")
+                print("==[.ds].readImageFromStorage: Image loaded from cache\n")
                 completion(image)
                 return
             } else {
@@ -204,11 +191,11 @@ class DataService {
                 let ref = FIRStorage.storage().reference(forURL: url)
                 ref.data(withMaxSize: 2 * 1024 * 1024 /* 2 Megabytes*/, completion: { (data, error) in
                     if error != nil {
-                        print("====[.ds].readImageFromStorage: Unable to download image from Firebase storage: \(error.debugDescription) \n")
+                        print("===[.ds].readImageFromStorage: Unable to download image from Firebase storage: \(error.debugDescription) \n")
                         completion(nil)
                         return
                     } else {
-                        print("===[.ds].readImageFromStorage: Image downloaded from Firebase storage\n" )
+                        print("==[.ds].readImageFromStorage: Image downloaded from Firebase storage\n" )
                         if let imgData = data {
                             if let img = UIImage(data: imgData) {
 

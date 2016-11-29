@@ -37,22 +37,15 @@ class User {
     
     var email: String {
         get {
-           if _email == nil {
-            _email = ""
-            }
-            return _email 
+            return _email ?? ""
         } set {
             _email = newValue
         }
-        
     }
     
     var provider: String {
         get {
-            if _provider == nil {
-                _provider = ""
-            }
-            return _provider
+            return _provider ?? ""
         } set {
             _provider = newValue
         }
@@ -60,17 +53,14 @@ class User {
     
     var avatarUrl: String {
         get {
-            if _avatarUrl == nil {
-                _avatarUrl = ""
-            }
-            return _avatarUrl
+            return _avatarUrl ?? ""
         } set {
             _avatarUrl = newValue
         }
     }
     
     init() {
-        self.userKey = ""
+        self._userKey = ""
         self._userName = ""
         self._email = ""
         self._provider = ""
@@ -78,10 +68,42 @@ class User {
     }
     
     init(userKey: String, userName: String, email: String, provider: String) {
-        self.userKey = userKey
+        self._userKey = userKey
         self._userName = userName
         self._email = email
-        self._provider = provider
+        self._provider = provider        
+    }
+    
+    init(userKey: String, userData: [String : Any]) {
+        
+        self._userKey = userKey
+        
+        if let userName = userData["userName"] as? String {
+            self._userName = userName
+        }
+
+        if let email = userData["email"]  as? String {
+            self._email = email
+        }
+        
+        if let provider = userData["provider"]  as? String {
+            self._provider = provider
+        }
+        
+        if let avatarUrl = userData["avatarUrl"] as? String {
+            self._avatarUrl = avatarUrl
+        }
+
+        
+//        if let dateOfCreate = userData["dateOfCreate"]  as? TimeInterval {
+//            self._dateOfCreate = Date(timeIntervalSince1970: dateOfCreate/1000)
+//        }
+//        
+//        if let dateOfUpdate = userData["dateOfUpdate"]  as? TimeInterval {
+//            self._dateOfUpdate = Date(timeIntervalSince1970: dateOfUpdate/1000)
+//        }
+        
+//        _userRef = DataService.ds.REF_POSTS.child(_userKey)
         
     }
 }
