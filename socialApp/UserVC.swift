@@ -32,7 +32,7 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
         
         switch self.openedFor {
         case .edit: // if view opened for editing existing user (with any auth provider)
-            DataService.ds.readCurrentUserFromDatabase(){
+            CurrentUser.cu.readCurrentUserFromDatabase(){
                 self.configureUserVCForEdit()
                 self.loadUserAvatar()
             }
@@ -88,12 +88,12 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
             if error != nil {
                 print("==[UserVC].createUserInFirebaseAuth() Unable to create user in Firebase Auth with email: \(error.debugDescription)")
                 
-                DataService.ds.currentFIRUser = nil
+                CurrentUser.cu.currentFIRUser = nil
             } else {
                 if let user = user {
-                    DataService.ds.currentFIRUser = user // i think it's usefull becouse off FeedVC. currentUser observer?
+                    CurrentUser.cu.currentFIRUser = user // i think it's usefull becouse off FeedVC. currentUser observer?
                     print("==[UserVC].createUserInFirebaseAuth() : New user successfully created in Firebase \(user.email)\n")
-                    DataService.ds.writeFIRUserDataToCurrenDBUser()
+                    CurrentUser.cu.writeFIRUserDataToCurrenDBUser()
                 }
             }
             completion()
@@ -102,7 +102,7 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
     
     func prepareUserDataForCreate(userAvatarUrl: String?, completion: @escaping(_ id: String, _ userData: Dictionary<String, Any>)-> Void){
         
-        if let user = DataService.ds.currentDBUser, user.provider != "" {
+        if let user = CurrentUser.cu.currentDBUser, user.provider != "" {
 
             var userData: [String : Any] = [
                 "email" : user.email,
@@ -127,7 +127,7 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
 
 //!! may be to rewrite? Why createFirebaseDBUser
     func completeSignIn(id: String, userData: Dictionary<String, Any>) {
-        DataService.ds.createFirebaseDBUser(uid: id, userData: userData)
+        CurrentUser.cu.createFirebaseDBUser(uid: id, userData: userData)
         if KeychainWrapper.standard.set(id, forKey: KEY_UID) {
             self.dismiss(animated: true, completion: nil)
         } else {
@@ -142,16 +142,16 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
     func configureUserVCForEdit() {
         
         userVCCaptionLabel.text = "Edit User"
-        userNameField.text = DataService.ds.currentDBUser.userName
-        emailField.text = DataService.ds.currentDBUser.email
+        userNameField.text = CurrentUser.cu.currentDBUser.userName
+        emailField.text = CurrentUser.cu.currentDBUser.email
         saveButton.setTitle("Save User", for: [])
         saveButton.addTarget(self, action: #selector(UserVC.saveUserTapped(_:)), for: .touchUpInside)
     }
     
     func loadUserAvatar() {
         
-        if DataService.ds.currentDBUser.avatarUrl != "" {
-            DataService.ds.readImageFromStorage(imageUrl: DataService.ds.currentDBUser.avatarUrl) { (image) in
+        if CurrentUser.cu.currentDBUser.avatarUrl != "" {
+            DataService.ds.readImageFromStorage(imageUrl: CurrentUser.cu.currentDBUser.avatarUrl) { (image) in
                 self.userAvatarImage.image = image
                 return
             }
@@ -187,14 +187,14 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
     }
     
     func tryToDeleteOldAvatar(){
-        if DataService.ds.currentDBUser.avatarUrl != "" {
-            DataService.ds.deleteImageFromStorage(imageUrl: DataService.ds.currentDBUser.avatarUrl)
+        if CurrentUser.cu.currentDBUser.avatarUrl != "" {
+            DataService.ds.deleteImageFromStorage(imageUrl: CurrentUser.cu.currentDBUser.avatarUrl)
         }
     }
 
 
     func saveExistingUserToDatabase(userAvatarUrl: String?){
-        if let user = DataService.ds.currentDBUser {
+        if let user = CurrentUser.cu.currentDBUser {
             // === create data for new user
             var userData = [
                 "userName" : userNameField.text!,

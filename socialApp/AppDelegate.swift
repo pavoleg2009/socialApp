@@ -24,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate{
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
 
         FIRApp.configure()
-        DataService.ds.currentDBUser = User()
+        CurrentUser.cu.currentDBUser = User()
         
         return true
     }

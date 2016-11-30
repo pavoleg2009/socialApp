@@ -18,6 +18,7 @@
 		284E5A821DD2901300561E7E /* RoundButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284E5A811DD2901300561E7E /* RoundButton.swift */; };
 		284E5A841DD291AE00561E7E /* MyTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284E5A831DD291AE00561E7E /* MyTextField.swift */; };
 		284E5A861DD2936C00561E7E /* MyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284E5A851DD2936C00561E7E /* MyButton.swift */; };
+		28AF966F1DEF094000A249CF /* CurrentUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28AF966E1DEF094000A249CF /* CurrentUser.swift */; };
 		28D0B9791DD3893C007B6B25 /* CircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D0B9781DD3893C007B6B25 /* CircleView.swift */; };
 		28D0B97B1DD3AF9F007B6B25 /* PostCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D0B97A1DD3AF9F007B6B25 /* PostCell.swift */; };
 		28D0B97E1DD3CCB3007B6B25 /* DataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D0B97D1DD3CCB3007B6B25 /* DataService.swift */; };
@@ -47,6 +48,7 @@
 		284E5A831DD291AE00561E7E /* MyTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyTextField.swift; sourceTree = "<group>"; };
 		284E5A851DD2936C00561E7E /* MyButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyButton.swift; sourceTree = "<group>"; };
 		284E5A871DD2A73D00561E7E /* socialApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = socialApp.entitlements; sourceTree = "<group>"; };
+		28AF966E1DEF094000A249CF /* CurrentUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurrentUser.swift; sourceTree = "<group>"; };
 		28D0B9781DD3893C007B6B25 /* CircleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CircleView.swift; sourceTree = "<group>"; };
 		28D0B97A1DD3AF9F007B6B25 /* PostCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostCell.swift; sourceTree = "<group>"; };
 		28D0B97D1DD3CCB3007B6B25 /* DataService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataService.swift; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 		28D0B97C1DD3CC9A007B6B25 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				28AF966E1DEF094000A249CF /* CurrentUser.swift */,
 				28D0B97D1DD3CCB3007B6B25 /* DataService.swift */,
 				28D0B9831DD52961007B6B25 /* OpenedFor.swift */,
 				28D48FA41DDDA78900C99672 /* MyCustomCellDelegator.swift */,
@@ -324,6 +327,7 @@
 				284E5A7D1DD28D5100561E7E /* HeaderView.swift in Sources */,
 				28D0B97B1DD3AF9F007B6B25 /* PostCell.swift in Sources */,
 				284E5A661DD268AC00561E7E /* AppDelegate.swift in Sources */,
+				28AF966F1DEF094000A249CF /* CurrentUser.swift in Sources */,
 				284E5A7F1DD28DE600561E7E /* Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

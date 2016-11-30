@@ -47,9 +47,9 @@ class PostCell: UITableViewCell {
         postCaptionText.text = "[\(dateStr)] : \(post.caption)"
         likesCountLabel.text = "\(post.likes)"
         authorLabel.text = post.authorName
-      //  self.editPostButton.isHidden = post.authorKey != DataService.ds.currentDBUser.userKey
+      //  self.editPostButton.isHidden = post.authorKey != CurrentUser.cu.currentDBUser.userKey
         
-        if let userRef = DataService.ds.REF_USER_CURRENT {
+        if let userRef = CurrentUser.cu.REF_USER_CURRENT {
             likesRef = userRef.child("likes").child(post.postKey)
         }
         

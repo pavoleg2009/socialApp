@@ -27,6 +27,8 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     
     var postsOrderedBy : String = "dateOfCreate"
     
+    var refreshControl: UIRefreshControl!
+    
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var userLabelName: UILabel!
     @IBOutlet weak var userEmailLabel: UILabel!
@@ -40,7 +42,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     override func viewWillAppear(_ animated: Bool) {
         setAuthObservser(){ (userAutheticated) in
             if userAutheticated {
-                DataService.ds.readCurrentUserFromDatabase()
+                CurrentUser.cu.readCurrentUserFromDatabase()
                 {
                     self.setCurrentUserLabels()
                     self.setTableView()
@@ -80,6 +82,15 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     func setTableView() {
         tableView.delegate = self
         tableView.dataSource = self
+        setRefreshControl()
+    }
+    
+    func setRefreshControl() {
+        refreshControl = UIRefreshControl.init()
+        refreshControl.backgroundColor = UIColor.orange
+        refreshControl.tintColor = UIColor.white
+        refreshControl.addTarget(self, action: #selector(updateTableView), for: UIControlEvents.valueChanged)
+        tableView.refreshControl = refreshControl
     }
     
     func setImagePicker() {
@@ -88,9 +99,14 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         imagePicker.delegate = self
     }
     
+    func updateTableView(){
+        tableView.reloadData()
+        self.refreshControl.endRefreshing()
+    }
+    
     func setCurrentUserLabels(){
-        userEmailLabel.text = DataService.ds.currentDBUser.email
-        displayNameLabel.text = DataService.ds.currentDBUser.userName
+        userEmailLabel.text = CurrentUser.cu.currentDBUser.email
+        displayNameLabel.text = CurrentUser.cu.currentDBUser.userName
         
     }
     
@@ -115,16 +131,16 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     func setLocalCurrentUser(user: FIRUser){
-        DataService.ds.currentFIRUser = user
-        DataService.ds.REF_USER_CURRENT = DataService.ds.REF_USERS.child(user.uid)
-        DataService.ds.writeFIRUserDataToCurrenDBUser()
+        CurrentUser.cu.currentFIRUser = user
+        CurrentUser.cu.REF_USER_CURRENT = DataService.ds.REF_USERS.child(user.uid)
+        CurrentUser.cu.writeFIRUserDataToCurrenDBUser()
         print("==[FeedVC].setAuthObservser() : User logged In : ...Count \(self.stateDidChangeListenerInvocationCount) \n")
     }
     
     func clearLocalCurrentUser(){
-        DataService.ds.currentFIRUser = nil
-        DataService.ds.REF_USER_CURRENT = nil
-        DataService.ds.currentDBUser = nil
+        CurrentUser.cu.currentFIRUser = nil
+        CurrentUser.cu.REF_USER_CURRENT = nil
+        CurrentUser.cu.currentDBUser = nil
         print("==[FeedVC].setAuthObservser() -> clearCurrentUser() : User logged Out/ not yet logged In: ...Count \(self.stateDidChangeListenerInvocationCount) \n")
     }
     
@@ -207,7 +223,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     @IBAction func btnSignOutTapped(_ sender: Any) {
-        DataService.ds.currentDBUser = User()
+        CurrentUser.cu.currentDBUser = User()
         KeychainWrapper.standard.removeObject(forKey: KEY_UID)
         removeDBObservers()
         try! FIRAuth.auth()?.signOut()

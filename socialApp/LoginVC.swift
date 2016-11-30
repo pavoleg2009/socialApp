@@ -132,7 +132,7 @@ class LoginVC: UIViewController, GIDSignInUIDelegate {
     
     
     func completeSignIn(id: String, userData: Dictionary<String, String>) {
-        DataService.ds.createFirebaseDBUser(uid: id, userData: userData)
+        CurrentUser.cu.createFirebaseDBUser(uid: id, userData: userData)
         if KeychainWrapper.standard.set(id, forKey: KEY_UID) {
             print("===[LoginVC].completeSignIn () : KeychainWrapper.standard.set() ")
             //performSegue(withIdentifier: "segueLogInToFeedVC", sender: nil /*User(userName: id)*/)

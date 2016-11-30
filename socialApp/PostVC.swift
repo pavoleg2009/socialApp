@@ -78,7 +78,7 @@ class PostVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
         var postData: [String : Any] = [
             "caption" : postCaptionField.text!,
             "likes" : 0,
-            "authorKey" : DataService.ds.currentDBUser.userKey!,
+            "authorKey" : CurrentUser.cu.currentDBUser.userKey!,
             "dateOfCreate": [".sv": "timestamp"],
             "dateOfUpdate": [".sv": "timestamp"]
         ]
