@@ -65,14 +65,14 @@ class Post {
     }
     
     var dateOfCreate: Date { get {
-            return _dateOfCreate
+            return _dateOfCreate ?? Date(timeIntervalSince1970: 0)
         } set {
             _dateOfCreate = newValue
         }
     }
 
     var dateOfUpdate: Date { get {
-        return _dateOfUpdate
+        return _dateOfUpdate ?? Date(timeIntervalSince1970: 0)
         } set {
             _dateOfUpdate = newValue
         }

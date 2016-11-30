@@ -28,14 +28,14 @@ class LoginVC: UIViewController, GIDSignInUIDelegate {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        print("==[LoginVC].viewWillAppear : \n")
+        //print("==[LoginVC].viewWillAppear : \n")
         if FIRAuth.auth()?.currentUser != nil {
             dismiss(animated: true, completion: nil)
         }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        print("==[LoginVC].viewWillDisappear : \n")
+        //print("==[LoginVC].viewWillDisappear : \n")
     }
     
     
@@ -77,12 +77,12 @@ class LoginVC: UIViewController, GIDSignInUIDelegate {
     func firebaseAuth(_ credential: FIRAuthCredential) {     
         FIRAuth.auth()?.signIn(with: credential, completion: { (gIdUser, error) in
             if error != nil {
-                print("=== [LoginVC].firebaseAuth(FIRAuth.auth()?.signIn completion): Error! Unable to authenticate with Facebook account in Firebase - \(error) \n")
+                print("===[LoginVC].firebaseAuth(FIRAuth.auth()?.signIn completion): Error! Unable to authenticate with Facebook account in Firebase - \(error) \n")
             } else {
-                print("=== [LoginVC].firebaseAuth(FIRAuth.auth()?.signIn completion): Successfully authenticated with Facebook account in Firebase \n")
+//                print("==[LoginVC].firebaseAuth(FIRAuth.auth()?.signIn completion): Successfully authenticated with Facebook account in Firebase \n")
                 if let gIdUser = gIdUser {
                     self.completeSignIn(id: gIdUser.uid, userData: ["provider": credential.provider])
-                    print("==== [LoginVC].firebaseAuth(FIRAuth.auth()?.signIn completion): credential.provider] = \(credential.provider) \n")
+                    print("====[LoginVC].firebaseAuth(FIRAuth.auth()?.signIn completion): credential.provider] = \(credential.provider) \n")
                 }
             }
         })

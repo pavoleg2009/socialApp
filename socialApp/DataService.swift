@@ -24,7 +24,7 @@ class DataService {
     private var _REF_BASE = DB_BASE
     private var _REF_POSTS = DB_BASE.child("posts")
     private var _REF_USERS = DB_BASE.child("users")
-    private var _ID_USER_CURRENT: String!
+    private var _REF_USER_CURRENT: FIRDatabaseReference!
     
     // Storage references
     private var _REF_POST_IMAGES = STORAGE_BASE.child("post-pics")
@@ -50,7 +50,37 @@ class DataService {
         return _REF_USER_AVATARS
     }
     
+    
+    var REF_USER_CURRENT_get_count = 0
+    var REF_USER_CURRENT_set_count = 0
+    
     var REF_USER_CURRENT: FIRDatabaseReference? {
+        
+        get {
+            REF_USER_CURRENT_get_count += 1
+            if _REF_USER_CURRENT != nil {
+                return _REF_USER_CURRENT
+                
+            } else if let uid = KeychainWrapper.standard.string(forKey: KEY_UID) {
+                
+                print("====[DataService.ds].REF_USER_CURRENT: User read from KeyChain : \(REF_USER_CURRENT_get_count)\n")
+                return REF_USERS.child(uid)
+                
+            } else {
+                print("===[DataService.ds].REF_USER_CURRENT: ERROR: No uresId in currenUser and in KeyChain\n")
+                //return FIRDatabaseReference()
+                return nil
+            }
+            
+        } set {
+            REF_USER_CURRENT_set_count += 1
+            _REF_USER_CURRENT = newValue
+        }
+        
+        
+        
+        
+        
         // looking for current user ID
         
         // 1. in local var currentDBUser: User!
@@ -63,15 +93,7 @@ class DataService {
 //        }
         // 2. in KeyChain
 //        else
-        if let uid = KeychainWrapper.standard.string(forKey: KEY_UID) {
-
-            print("====[DataService.ds].REF_USER_CURRENT: User read from KeyChain \n")
-            return REF_USERS.child(uid)
-
-        } else {
-            print("====[DataService.ds].REF_USER_CURRENT: ERROR: No uresId in currenUser and in KeyChain \n")
-            return FIRDatabaseReference() //nil
-        }
+        
     }
     
 ////////////////////////////////////////////////
@@ -183,7 +205,7 @@ class DataService {
         if let url = imageUrl, url != "" {
             // check image in cache
             if let image = DataService.imageCache.object(forKey: url as NSString) {
-                print("==[.ds].readImageFromStorage: Image loaded from cache\n")
+//                print("==[.ds].readImageFromStorage: Image loaded from cache\n")
                 completion(image)
                 return
             } else {
@@ -195,7 +217,7 @@ class DataService {
                         completion(nil)
                         return
                     } else {
-                        print("==[.ds].readImageFromStorage: Image downloaded from Firebase storage\n" )
+//                        print("==[.ds].readImageFromStorage: Image downloaded from Firebase storage\n" )
                         if let imgData = data {
                             if let img = UIImage(data: imgData) {
 

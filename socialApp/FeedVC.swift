@@ -40,7 +40,6 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     override func viewWillAppear(_ animated: Bool) {
         setAuthObservser(){ (userAutheticated) in
             if userAutheticated {
-                print("===[FeedVC].viewWillAppear() : setAuthObservser() completion: User authenicated, continue init\n")
                 DataService.ds.readCurrentUserFromDatabase()
                 {
                     self.setCurrentUserLabels()
@@ -49,26 +48,30 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
                     self.setPostsObserver()
                 }
             } else {
-                print("===[FeedVC].viewWillAppear() : setAuthObservser() completion: No user authenicated, go to loginVC\n")
                 self.performSegue(withIdentifier: "segueFeedToLoginVC", sender: nil)
             }
         }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        print("==[FeedVC].viewWillDisappear : removeAuthStateDidChangeListener \n")
+//        print("==[FeedVC].viewWillDisappear : removeAuthStateDidChangeListener \n")
         FIRAuth.auth()?.removeStateDidChangeListener(authStateDidChangeListenerHandle)
-        
+        removeDBObservers()
         // what even is better to remove listener? viewWillDisappear or viewDidDisappear
     }
-
     
-    override func viewDidDisappear(_ animated: Bool) {
-        //remove listeners
+    func removeDBObservers(){
+        removePostObsever()
+        removeUserObsever()
+    }
+    
+    func removePostObsever(){
         if let _ = postsHandle {
             DataService.ds.REF_POSTS.removeObserver(withHandle: postsHandle)
         }
-        
+    }
+    
+    func removeUserObsever(){
         if let _ = usersHandle {
             DataService.ds.REF_POSTS.removeObserver(withHandle: usersHandle)
         }
@@ -97,16 +100,12 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             
             if let user = user { // User is signed in.
 
-                DataService.ds.currentFIRUser = user
-                DataService.ds.writeFIRUserDataToCurrenDBUser()
-                print("==[FeedVC].setAuthObservser() : User logged In : ...Count \(self.stateDidChangeListenerInvocationCount) \n")
+                self.setLocalCurrentUser(user: user)
                 completion(true)
                 
             } else {
                 // No user is signed in.
-                DataService.ds.currentFIRUser = nil
-                DataService.ds.currentDBUser = nil
-                print("==[FeedVC].setAuthObservser() : User logged Out/ not yet logged In: ...Count \(self.stateDidChangeListenerInvocationCount) \n")
+                self.clearLocalCurrentUser()
                 completion(false)
                 self.userEmailLabel.text = "No user logged / not yet logged in"
             }
@@ -114,21 +113,31 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             self.stateDidChangeListenerInvocationCount += 1
         }
     }
-
+    
+    func setLocalCurrentUser(user: FIRUser){
+        DataService.ds.currentFIRUser = user
+        DataService.ds.REF_USER_CURRENT = DataService.ds.REF_USERS.child(user.uid)
+        DataService.ds.writeFIRUserDataToCurrenDBUser()
+        print("==[FeedVC].setAuthObservser() : User logged In : ...Count \(self.stateDidChangeListenerInvocationCount) \n")
+    }
+    
+    func clearLocalCurrentUser(){
+        DataService.ds.currentFIRUser = nil
+        DataService.ds.REF_USER_CURRENT = nil
+        DataService.ds.currentDBUser = nil
+        print("==[FeedVC].setAuthObservser() -> clearCurrentUser() : User logged Out/ not yet logged In: ...Count \(self.stateDidChangeListenerInvocationCount) \n")
+    }
+    
     func setPostsObserver() {
         
         postsHandle = DataService.ds.REF_POSTS.queryOrdered(byChild: postsOrderedBy).observe(.value, with: { (snapshot) in
             if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
-                self.posts = snapshots.map(self.parseSnapshotToPost)//.map(self.addAutorInfoToPost)
-                //read authorName and authorAvatarUrl here, not in configure Cell
+                self.posts = snapshots.map(self.parseSnapshotToPost)
                 self.setUserObserver(){
                     self.posts = self.posts.map(self.addUserDataToPost)
-
                     self.tableView.reloadData()
                 }
-                
             }
-            
         }, withCancel: { (error) in
             print("===[FeedVC] DB Error (setupPostsObserver) : \(error)\n")
         })
@@ -143,8 +152,6 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     func addUserDataToPost(post: Post) -> Post {
-//        var tempPost = post
-        
         if let userName = usersDict[post.authorKey]?.userName {
             post.authorName = userName
         }
@@ -160,20 +167,13 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         usersHandle = DataService.ds.REF_USERS.observe(.value, with: { (snapshot) in
             if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 self.users = snapshots.map(self.parseSnapshotToUser)
-                // not working %((
-                //self.usersDict = self.users.map({($0.userKey!, $0)})
-                
                 for user in self.users {
                     self.usersDict[user.userKey!] = user
                 }
-                
-                
-//                self.users = snapshots.map(self.parseSnapshotToUser)
-                
             }
             completion()
         }, withCancel: { (error) in
-            print("===[FeedVC] DB Error (setupPostsObserver) : \(error)\n")
+            print("===[FeedVC] DB Error (setupPostsObserver) !! : \(error)\n")
             completion()
         })
     }
@@ -185,22 +185,6 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             return User()
         }
     }
-    
-//    func populateUsersToUserDict(user: User) -> (String, User){
-//        return (user.userKey, user)
-//    }
-    
-//    func addAutorInfoToPost(post: Post) -> Post {
-//        
-//        if let authorKey = post.authorKey as? String {
-//            let tempPost = post
-//            
-//            return tempPost
-//        } else {
-//            return post
-//        }
-//    }
-
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -225,10 +209,8 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     @IBAction func btnSignOutTapped(_ sender: Any) {
         DataService.ds.currentDBUser = User()
         KeychainWrapper.standard.removeObject(forKey: KEY_UID)
-        print("==[FeedVC].btnSignOutTapped: ID removed from KeyChain \n")
+        removeDBObservers()
         try! FIRAuth.auth()?.signOut()
-        print("==[FeedVC].btnSignOutTapped: LogOut from Firebase \n")
-
     }
     
     @IBAction func newPostButtonTaped(_ sender: Any) {
@@ -274,8 +256,8 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         default:
             postsOrderedBy = "dateOfCreate"
         }
-        
-        print("==[FeedVC].sortByTapped() : \(index) : \(sender.titleForSegment(at: index))\n")
+
+        removePostObsever()
         setPostsObserver()
 
     }

@@ -40,10 +40,13 @@ class PostCell: UITableViewCell {
     func configureCell(post: Post) {
         self.post = post
         
-        postCaptionText.text = "[\(post.dateOfCreate)] : \(post.caption)"
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm zzz"
+        let dateStr = dateFormatter.string(from: self.post.dateOfCreate)
+
+        postCaptionText.text = "[\(dateStr)] : \(post.caption)"
         likesCountLabel.text = "\(post.likes)"
         authorLabel.text = post.authorName
-        
       //  self.editPostButton.isHidden = post.authorKey != DataService.ds.currentDBUser.userKey
         
         if let userRef = DataService.ds.REF_USER_CURRENT {
@@ -51,11 +54,9 @@ class PostCell: UITableViewCell {
         }
         
         //load post image and avatar
-        
         DataService.ds.readImageFromStorage(imageUrl: post.imageUrl) { (image) in
             self.postImage.image = image
         }
-     
         DataService.ds.readImageFromStorage(imageUrl: post.authorAvatarUrl) { image in
             self.userAvatarImage.image = image
         }
@@ -98,6 +99,7 @@ class PostCell: UITableViewCell {
         
         if(self.delegate != nil){ //Just to be safe.
             self.delegate.callSegueFromCell(myData: post as AnyObject)
+            print("===[PostCell].editPostButtonTapped{} : \(post.caption) - \(post.postKey)\n")
         }
         
     }

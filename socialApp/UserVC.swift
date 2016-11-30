@@ -34,7 +34,7 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
         case .edit: // if view opened for editing existing user (with any auth provider)
             DataService.ds.readCurrentUserFromDatabase(){
                 self.configureUserVCForEdit()
-                self.loadUserAvatar() {}
+                self.loadUserAvatar()
             }
         default: // if view opened for adding user
             configureUserVCForCreate()
@@ -136,11 +136,9 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
     }
 
 ////////////////////////////////
-// Read Post Data From Database
+// Read User Data From Database
 ////////////////////////////////
-    
-
-    
+      
     func configureUserVCForEdit() {
         
         userVCCaptionLabel.text = "Edit User"
@@ -150,18 +148,15 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
         saveButton.addTarget(self, action: #selector(UserVC.saveUserTapped(_:)), for: .touchUpInside)
     }
     
-    func loadUserAvatar(completion: @escaping() -> Void) {
+    func loadUserAvatar() {
         
         if DataService.ds.currentDBUser.avatarUrl != "" {
             DataService.ds.readImageFromStorage(imageUrl: DataService.ds.currentDBUser.avatarUrl) { (image) in
-                
                 self.userAvatarImage.image = image
-                completion()
                 return
             }
         } else {
             print("=== No user avatar URL assigned to user\n")
-            completion()
         }
     }
 
@@ -172,7 +167,7 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
 
     func saveUserTapped(_ sender: Any) {
         // https://firebase.google.com/docs/auth/ios/manage-users - add email and password change
-        if isEnteredDataValidForExistingUser() {
+        if enteredDataIsValidForExistingUser() {
             if avatarSelectedOrChanged {
                 tryToDeleteOldAvatar()
                 DataService.ds.createImageInStorage(image: self.userAvatarImage.image, ref: DataService.ds.REF_USER_AVARATS) {savedImageUrl in
@@ -184,22 +179,19 @@ class UserVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
         }
     }
 
-    func tryToDeleteOldAvatar(){
-        // if avatarImage changed - checked before invoke this 
-        print("====[UserVC].tryToDeleteAvatar (::before):  \(DataService.ds.currentDBUser.avatarUrl)\n")
-        if DataService.ds.currentDBUser.avatarUrl != "" {
-            DataService.ds.deleteImageFromStorage(imageUrl: DataService.ds.currentDBUser.avatarUrl)
-        }
-        print("====[UserVC].tryToDeleteAvatar (::after):  \(DataService.ds.currentDBUser.avatarUrl)\n")
-        
-    }
-
-    func isEnteredDataValidForExistingUser() -> Bool {
+    func enteredDataIsValidForExistingUser() -> Bool {
         // userName (not empty)
         // email (not empty & correct format & not used by other user
         // password ( >= 8 characters, password = password confirm
-        return true
+        return userNameField.text != ""
     }
+    
+    func tryToDeleteOldAvatar(){
+        if DataService.ds.currentDBUser.avatarUrl != "" {
+            DataService.ds.deleteImageFromStorage(imageUrl: DataService.ds.currentDBUser.avatarUrl)
+        }
+    }
+
 
     func saveExistingUserToDatabase(userAvatarUrl: String?){
         if let user = DataService.ds.currentDBUser {

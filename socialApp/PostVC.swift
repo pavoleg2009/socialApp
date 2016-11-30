@@ -55,10 +55,10 @@ class PostVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
     }
     
     func createPostTapped(_ sender: Any) {
-        if isEnteredDataValidForNewPost() {
+        if enteredDataIsValidForNewPost() {
             DataService.ds.createImageInStorage(image: postImage.image, ref: DataService.ds.REF_POST_IMAGES) {createdImageURL in
                 self.preparePostDataForCreate(postImageUrl: createdImageURL) { (newPostRef, postData) in
-                    self.updatePostInDatabase(firebasePostRef: newPostRef, postData: postData)
+                    self.createPostInDatabase(firebasePostRef: newPostRef, postData: postData)
                 }
             }
         } else {
@@ -66,14 +66,14 @@ class PostVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
         }
     }
     
-    func isEnteredDataValidForNewPost() -> Bool {
+    func enteredDataIsValidForNewPost() -> Bool {
         // postCaption (not empty)
         // image selected
         return postCaptionField.text != "" && imageSelectedOrChanged
 
     }
     
-    func preparePostDataForCreate(postImageUrl: String?, completion: @escaping(_ firebasePostRef: FIRDatabaseReference, _ postData: Dictionary<String, Any>)->Void){
+    func preparePostDataForCreate(postImageUrl: String?, completion: @escaping(_ firebasePostRef: FIRDatabaseReference, _ postData: [String : Any])->Void){
         
         var postData: [String : Any] = [
             "caption" : postCaptionField.text!,
@@ -92,12 +92,12 @@ class PostVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
         completion(newPostRef, postData)
     }
     
-    func updatePostInDatabase(firebasePostRef: FIRDatabaseReference, postData: Dictionary<String, Any>) {
+    func createPostInDatabase(firebasePostRef: FIRDatabaseReference, postData: [String : Any]) {
         
         firebasePostRef.setValue(postData, withCompletionBlock: {(error, dbReference) in
             if error != nil {
                 // error whily trying to save posr (permiossion or smth else)
-                print("====[].savePostToFirebase(.setValue completion): Error while trying to save post to Firebase: \(error.debugDescription)\n")
+                print("===[PostVC].savePostToFirebase().setValue completion): Error while trying to save post to Firebase: \(error.debugDescription)\n")
             } else {
                 // new post saved successfull
                 self.dismiss(animated: true, completion: nil)
@@ -110,33 +110,17 @@ class PostVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
 ////////////////////////////////
     
     func readPostData(completion: @escaping() -> Void) {
-        
-//!!
+        // in future: reading comments
+        completion()
     }
-
-    
+   
     func configurePostVCForEdit() {
         postVCCaptionLabel.text = "Edit Post"
         postCaptionField.text = post.caption
         saveButton.setTitle("Save Post", for: [])
         saveButton.addTarget(self, action: #selector(PostVC.savePostTapped(_:)), for: .touchUpInside)
-        
     }
 
-////////////////////////////////
-// Update Post Info in Database
-////////////////////////////////
-    
-    func savePostTapped(_ sender: Any) {
-//!! write here
-        
-        preparePostDataForUpdate(){postData in
-            if let postData = postData {
-//                self.updatePostInDatabase(postDataToUpdate: postData)
-            }
-        }
-    }
-    
     func loadPostImage() {
         
         if post.imageUrl != "" {
@@ -144,50 +128,77 @@ class PostVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
                 self.postImage.image = image
                 return
             }
-        
+            
         } else { // if imageUrl is empty
             postImage.image = UIImage(named: "thumbnail-default")
         }
     }
     
+////////////////////////////////
+// Update Post Info in Database
+////////////////////////////////
     
-    func preparePostDataForUpdate(completion: @escaping(Dictionary<String, Any>?) -> Void) {
-        //put data from UIControls to post
-        
-        var postDataToUpdate: [String : Any] = [:]
-        
-        if postCaptionField.text != "" && postCaptionField.text != post.caption {
-            postDataToUpdate["caption"] = postCaptionField.text!
-        }
-        
-        postDataToUpdate["dateOfUpdate"] = [".sv": "timestamp"]
-        
-        if imageSelectedOrChanged {
-           
-            DataService.ds.createImageInStorage(image: postImage.image, ref: DataService.ds.REF_POST_IMAGES) {newImageUrl in
-                if let url = newImageUrl {
-                    if self.post.imageUrl != "" {
-                        DataService.ds.deleteImageFromStorage(imageUrl: self.post.imageUrl)
+    func savePostTapped(_ sender: Any) {
+        if enteredDataIsValidForUpdatePost() {
+            if imageSelectedOrChanged {
+                tryToDeleteOldImage()
+                DataService.ds.createImageInStorage(image: postImage.image, ref: DataService.ds.REF_POST_IMAGES) {createdImageURL in
+                    self.preparePostDataForUpdate(postImageUrl: createdImageURL) { (newPostRef, postData) in
+                        self.updatePostInDatabase(firebasePostRef: newPostRef, postData: postData)
                     }
-                    self.post.imageUrl = url
-                    print("===[PostVC] \n ")
-                    postDataToUpdate["imageUrl"] = url
-                    
-                    completion(postDataToUpdate)
-                } else {
-                    //no image added
-                    completion(nil)
                 }
-            }
-        } else { // no image changed, but title can be changed
-            if postDataToUpdate.count > 0 {
-                completion(postDataToUpdate)
             } else {
-                completion(nil)
+                preparePostDataForUpdate(postImageUrl: nil) { (newPostRef, postData) in
+                    self.updatePostInDatabase(firebasePostRef: newPostRef, postData: postData)
+                }
             }
         }
     }
     
+    func enteredDataIsValidForUpdatePost() -> Bool {
+        return postCaptionField.text != ""
+    }
+    
+    func tryToDeleteOldImage(){
+        if post.imageUrl != "" {
+            DataService.ds.deleteImageFromStorage(imageUrl: post.imageUrl)
+        }
+        
+    }
+    
+    func preparePostDataForUpdate(postImageUrl: String?, completion: @escaping(_ firebasePostRef: FIRDatabaseReference, _ postData: [String : Any]) -> Void) {
+        //put data from UIControls to post
+        
+        var postData: [String : Any] = [:]
+        
+        if postCaptionField.text != "" && postCaptionField.text != post.caption {
+            postData["caption"] = postCaptionField.text!
+        }
+      
+        if let url = postImageUrl, url != "" {
+            postData["imageUrl"] = url
+        }
+        
+        if postData.count > 0 { // check if has some data to update
+            postData["dateOfUpdate"] = [".sv": "timestamp"]
+        }
+        
+        let newPostRef = DataService.ds.REF_POSTS.child(post.postKey)
+        completion(newPostRef, postData)
+    }
+
+    func updatePostInDatabase(firebasePostRef: FIRDatabaseReference, postData: [String : Any]) {
+        
+        firebasePostRef.updateChildValues(postData, withCompletionBlock: {(error, dbReference) in
+            if error != nil {
+                // error whily trying to save posr (permiossion or smth else)
+                print("===[PostVC].updatePostInDatabase().pdateChildValues completion): Error while trying update post to Firebase: \(error.debugDescription)\n")
+            } else {
+                // post updated successfull
+                self.dismiss(animated: true, completion: nil)
+            }
+        })
+    }
 
 ////////////////////////////////
 //  Delete Post
