@@ -53,8 +53,13 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
                 self.performSegue(withIdentifier: "segueFeedToLoginVC", sender: nil)
             }
         }
+        
+
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        performSegue(withIdentifier: "segueFeedToCoomentsVC", sender: nil)
+    }
     override func viewWillDisappear(_ animated: Bool) {
 //        print("==[FeedVC].viewWillDisappear : removeAuthStateDidChangeListener \n")
         FIRAuth.auth()?.removeStateDidChangeListener(authStateDidChangeListenerHandle)
