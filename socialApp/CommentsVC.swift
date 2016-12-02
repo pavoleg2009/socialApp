@@ -7,11 +7,14 @@
 //
 
 import UIKit
+import Firebase
 
 class CommentsVC: UIViewController, UITextFieldDelegate {
-
-    @IBOutlet weak var commentTextField: UITextField!
     
+    var post: Post!
+    
+    @IBOutlet weak var postCaptionLabel: UILabel!
+    @IBOutlet weak var commentTextField: UITextField!
     @IBOutlet weak var scrollView: UIScrollView!
     
     override func viewDidLoad() {
@@ -23,7 +26,13 @@ class CommentsVC: UIViewController, UITextFieldDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: .UIKeyboardWillHide, object: nil)
     
     }
-        
+    
+    override func viewWillAppear(_ animated: Bool) {
+        if post != nil {
+            postCaptionLabel.text = post.caption
+        }
+    }
+    
     func keyboardWillShow(notification: Notification){
         if commentTextField.isFirstResponder {
             if let userInfo = notification.userInfo {
@@ -32,6 +41,7 @@ class CommentsVC: UIViewController, UITextFieldDelegate {
             }
         }
     }
+    
     
     func commentViewScrollUp(keyboardFrame: CGRect){
         scrollView.setContentOffset(CGPoint(x: 0, y: (keyboardFrame.size.height)), animated: false)
@@ -69,7 +79,8 @@ class CommentsVC: UIViewController, UITextFieldDelegate {
 
     func sendComment() {
         if let commentText = commentTextField.text, commentText != "" {
-            print("==== sendComment: \(commentText)\n")
+            saveCommentToDB(commentText)
+            
             commentTextField.text = ""
             
             //commentTextField.resignFirstResponder() 
@@ -78,4 +89,45 @@ class CommentsVC: UIViewController, UITextFieldDelegate {
 
     }
     
+    func saveCommentToDB(_ commentText: String?){
+        
+        if commentText != nil {
+            prepareCommentData(commentText: commentText!){ (newCommentRef, newCommentData) in
+                self.createCommentInDb(commentRef: newCommentRef, commentData: newCommentData) {
+                    //update tableView
+                }
+
+            }
+        }
+    }
+    
+    func prepareCommentData(commentText: String, completion: @escaping (_ firebaseCommentRef: FIRDatabaseReference, _ commentData: [String : Any])->Void){
+        let newCommentData: [String: Any] = [
+            "caption" : commentText,
+            "likes" : 0,
+            "authorKey" : CurrentUser.cu.currentDBUser.userKey!,
+            "dateOfCreate": [".sv": "timestamp"],
+            "dateOfUpdate": [".sv": "timestamp"]
+        ]
+        
+        let newCommentRef = DataService.ds.REF_POSTS.child("\(post.postKey)/comments").childByAutoId()
+        
+        completion(newCommentRef, newCommentData)
+        
+    }
+    
+    func createCommentInDb(commentRef: FIRDatabaseReference, commentData: [String : Any], completion: @escaping()->Void){
+        commentRef.setValue(commentData) { (err, ref) in
+            if err != nil {
+                print("===[CommentsVC].createCommentinDb : ERROR creating comment in Firebase DB\(err.debugDescription)\n")
+                return
+            } else {
+                print("==[CommentsVC].createCommentinDb : Comment created in : \(ref.key)\n")
+            }
+        }
+    }
+    
+    @IBAction func backBtnTapped(_ sender: Any) {
+        dismiss(animated: true, completion: nil)
+    }
 }

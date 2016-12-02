@@ -210,12 +210,10 @@
                                     <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XU2-eD-0qK">
                                         <rect key="frame" x="8" y="27" width="66" height="30"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <state key="normal" title="&lt; Cancel"/>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gVa-Q1-mGN">
-                                        <rect key="frame" x="301" y="27" width="66" height="30"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <state key="normal" title="&lt; Save"/>
+                                        <state key="normal" title="&lt; Back"/>
+                                        <connections>
+                                            <action selector="backBtnTapped:" destination="b3E-1F-uP8" eventType="touchUpInside" id="gCF-wB-bZi"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                                 <color key="backgroundColor" red="0.01176470588" green="0.66274509800000003" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
@@ -261,28 +259,11 @@
                                             <constraint firstAttribute="trailing" secondItem="qO6-y3-yN4" secondAttribute="trailing" constant="8" id="bpZ-0e-tYj"/>
                                         </constraints>
                                     </view>
-                                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="hkq-7R-BLP">
-                                        <rect key="frame" x="139" y="8" width="97" height="30"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="30" id="0w7-4a-VL4"/>
-                                            <constraint firstAttribute="width" constant="97" id="y9A-0H-eVa"/>
-                                        </constraints>
-                                        <nil key="textColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <textInputTraits key="textInputTraits"/>
-                                        <connections>
-                                            <outlet property="delegate" destination="b3E-1F-uP8" id="KHZ-C9-Y9d"/>
-                                        </connections>
-                                    </textField>
                                 </subviews>
                                 <gestureRecognizers/>
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="vi8-MW-AVQ" secondAttribute="bottom" id="18C-xI-OBg"/>
                                     <constraint firstAttribute="trailing" secondItem="vi8-MW-AVQ" secondAttribute="trailing" id="7vB-ub-K7W"/>
-                                    <constraint firstAttribute="trailing" secondItem="hkq-7R-BLP" secondAttribute="trailing" constant="139" id="I2a-mi-Wev"/>
-                                    <constraint firstItem="hkq-7R-BLP" firstAttribute="leading" secondItem="alX-ZE-2Yk" secondAttribute="leading" constant="139" id="MYd-56-PrI"/>
-                                    <constraint firstItem="vi8-MW-AVQ" firstAttribute="top" secondItem="hkq-7R-BLP" secondAttribute="bottom" constant="515" id="OEm-SW-qKw"/>
-                                    <constraint firstItem="hkq-7R-BLP" firstAttribute="top" secondItem="alX-ZE-2Yk" secondAttribute="top" constant="8" id="Tbb-ff-A5g"/>
                                     <constraint firstItem="vi8-MW-AVQ" firstAttribute="top" secondItem="alX-ZE-2Yk" secondAttribute="top" constant="553" id="m8K-0O-SUA"/>
                                     <constraint firstItem="vi8-MW-AVQ" firstAttribute="leading" secondItem="alX-ZE-2Yk" secondAttribute="leading" id="ozc-I8-iTQ"/>
                                 </constraints>
@@ -304,6 +285,7 @@
                     </view>
                     <connections>
                         <outlet property="commentTextField" destination="hdd-9U-RaH" id="T0u-Ua-4Mw"/>
+                        <outlet property="postCaptionLabel" destination="kOZ-dY-fE5" id="4Py-zz-l4s"/>
                         <outlet property="scrollView" destination="alX-ZE-2Yk" id="6vX-I3-aZ8"/>
                     </connections>
                 </viewController>
@@ -824,15 +806,25 @@
                                                                             <nil key="highlightedColor"/>
                                                                         </label>
                                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="8888" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hPV-ia-9jz">
-                                                                            <rect key="frame" x="49" y="0.0" width="208" height="22"/>
+                                                                            <rect key="frame" x="49" y="0.0" width="170" height="22"/>
                                                                             <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="16"/>
                                                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="0.87" colorSpace="calibratedRGB"/>
                                                                             <nil key="highlightedColor"/>
                                                                         </label>
-                                                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="V8r-Pd-5fo">
-                                                                            <rect key="frame" x="261" y="0.0" width="66" height="22"/>
+                                                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FQE-E7-Wyj">
+                                                                            <rect key="frame" x="223" y="0.0" width="50" height="22"/>
                                                                             <constraints>
-                                                                                <constraint firstAttribute="width" constant="66" id="G2q-fl-ao1"/>
+                                                                                <constraint firstAttribute="width" constant="50" id="ff2-2y-6jr"/>
+                                                                            </constraints>
+                                                                            <state key="normal" title="Com&gt;"/>
+                                                                            <connections>
+                                                                                <action selector="commentButtonTapped:" destination="Hze-xM-837" eventType="touchUpInside" id="2Yv-gN-05k"/>
+                                                                            </connections>
+                                                                        </button>
+                                                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="V8r-Pd-5fo">
+                                                                            <rect key="frame" x="277" y="0.0" width="50" height="22"/>
+                                                                            <constraints>
+                                                                                <constraint firstAttribute="width" constant="50" id="G2q-fl-ao1"/>
                                                                             </constraints>
                                                                             <state key="normal" title="Edit &gt;"/>
                                                                             <connections>
@@ -875,6 +867,7 @@
                                         </tableViewCellContentView>
                                         <connections>
                                             <outlet property="authorLabel" destination="Uas-Cp-LGB" id="iEw-cW-4NE"/>
+                                            <outlet property="commentButton" destination="FQE-E7-Wyj" id="Ir8-KH-hTU"/>
                                             <outlet property="editPostButton" destination="V8r-Pd-5fo" id="jAk-PA-kQa"/>
                                             <outlet property="likeImage" destination="1d9-i5-v8m" id="KYf-5q-ykG"/>
                                             <outlet property="likesCountLabel" destination="hPV-ia-9jz" id="tWI-5Z-YEl"/>
@@ -1012,7 +1005,7 @@
                         <segue destination="5JA-Y7-ana" kind="show" identifier="segueFeedToUserVC" id="qOI-hM-TIM"/>
                         <segue destination="shy-Ke-J3n" kind="show" identifier="segueFeedToPostVC" id="NDp-ch-kND"/>
                         <segue destination="BYZ-38-t0r" kind="show" identifier="segueFeedToLoginVC" id="Mxf-q0-fJD"/>
-                        <segue destination="b3E-1F-uP8" kind="show" identifier="segueFeedToCoomentsVC" id="VIa-vh-dF1"/>
+                        <segue destination="b3E-1F-uP8" kind="show" identifier="segueFeedToCommentsVC" id="VIa-vh-dF1"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5zf-WI-YZD" userLabel="First Responder" sceneMemberID="firstResponder"/>

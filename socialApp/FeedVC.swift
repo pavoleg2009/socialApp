@@ -58,7 +58,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        performSegue(withIdentifier: "segueFeedToCoomentsVC", sender: nil)
+//        performSegue(withIdentifier: "segueFeedToCommentsVC", sender: nil)
     }
     override func viewWillDisappear(_ animated: Bool) {
 //        print("==[FeedVC].viewWillDisappear : removeAuthStateDidChangeListener \n")
@@ -242,8 +242,12 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         performSegue(withIdentifier: "segueFeedToUserVC", sender: nil)
     }
     
-    func callSegueFromCell(myData post: AnyObject) {
+    func callEditSegueFromCell(myData post: AnyObject) {
         self.performSegue(withIdentifier: "segueFeedToPostVC", sender: post)
+    }
+
+    func callCommentSegueFromCell(myData post: AnyObject) {
+        self.performSegue(withIdentifier: "segueFeedToCommentsVC", sender: post)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -263,6 +267,18 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
                     postVC.post = Post()
                 }
     
+            }
+        }
+        
+        if segue.identifier == "segueFeedToCommentsVC" {
+            print("===[FeedVC].prepareForSegue : segueFeedToCommentsVC")
+            if let commentsVC = segue.destination as? CommentsVC {
+                if let post = sender as? Post {
+                    commentsVC.post = post
+                } else {
+                    print("===[FeedVC].prepareForSegue : segueFeedToCommentsVC : Can't add comments withouth post\n")
+                }
+                
             }
         }
     }

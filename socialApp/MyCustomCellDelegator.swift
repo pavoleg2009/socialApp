@@ -10,5 +10,6 @@ import Foundation
 
 
 protocol MyCustomCellDelegator {
-    func callSegueFromCell(myData dataobject: AnyObject)
+    func callEditSegueFromCell(myData dataobject: AnyObject)
+    func callCommentSegueFromCell(myData dataobject: AnyObject)
 }

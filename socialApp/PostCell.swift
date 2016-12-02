@@ -22,6 +22,8 @@ class PostCell: UITableViewCell {
     @IBOutlet weak var postImage: UIImageView!
     @IBOutlet weak var postCaptionText: UITextView!
     @IBOutlet weak var likesCountLabel: UILabel!
+    
+    @IBOutlet weak var commentButton: UIButton!
     @IBOutlet weak var editPostButton: UIButton!
     
     override func awakeFromNib() {
@@ -98,11 +100,16 @@ class PostCell: UITableViewCell {
     @IBAction func editPostButtonTapped(_ sender: Any) {
         
         if(self.delegate != nil){ //Just to be safe.
-            self.delegate.callSegueFromCell(myData: post as AnyObject)
-            print("===[PostCell].editPostButtonTapped{} : \(post.caption) - \(post.postKey)\n")
+            self.delegate.callEditSegueFromCell(myData: post as AnyObject)
+//            print("===[PostCell].editPostButtonTapped{} : \(post.caption) - \(post.postKey)\n")
         }
         
     }
 
+    @IBAction func commentButtonTapped(_ sender: Any) {
+        if(self.delegate != nil){ //Just to be safe.
+            self.delegate.callCommentSegueFromCell(myData: post as AnyObject)
+        }
+    }
 
 }
