@@ -63,12 +63,17 @@ class CurrentUser {
     // read user data from db/users/$uid/... for current autenticated user
     // and save it to currentDBUser variable
     
+    var readCUFromDBInvocation = 0
     func readCurrentUserFromDatabase(completion: @escaping ()-> Void){
         CurrentUser.cu.REF_USER_CURRENT?.observeSingleEvent(of: .value, with: { (snapshot) in
-            
+            ////
+//            self.readCUFromDBInvocation += 1
+//            print("====[.ds].readCUFromDB : readCUFromDBInvocation = \(self.readCUFromDBInvocation)\n")
+            ////
             if let _ = snapshot.value as? NSNull {
                 print("====[.ds].readCurrentUserFromDatabase() : Error trying to get snapshor ffrom \\users. Snapshot is nil \n")
             } else {
+                
                 
                 if let snapDict = snapshot.value as? [String : AnyObject]{
                     

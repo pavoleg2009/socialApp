@@ -18,9 +18,9 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     var imagePicker: UIImagePickerController!
     var imageSelected = false
     
-    private var authStateDidChangeListenerHandle: FIRAuthStateDidChangeListenerHandle!
-    var postsHandle: UInt!
-    var usersHandle: UInt!
+    private var authStateDidChangeListenerHandle: FIRAuthStateDidChangeListenerHandle?
+    var postsObserverHandle: UInt?
+//    var usersHandle: UInt!
     var dbCurrentUserHandle: UInt!
     
     var stateDidChangeListenerInvocationCount = 0
@@ -39,51 +39,44 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
     }
     
+    var authObservserCompletionInvocationCount = 0
+    
     override func viewWillAppear(_ animated: Bool) {
-        setAuthObservser(){ (userAutheticated) in
+
+        setAuthObservser(){ userAutheticated in
             if userAutheticated {
-                CurrentUser.cu.readCurrentUserFromDatabase()
-                {
-                    self.setCurrentUserLabels()
-                    self.setTableView()
-                    self.setImagePicker()
-                    self.setPostsObserver()
+                
+                if self.authObservserCompletionInvocationCount > 0 {
+//!! run only one time
+                   //// 
+                   
+                    print("====[FeddVC].viewWillAppear: authObservserCompletionInvocationCount = \(self.authObservserCompletionInvocationCount) \n")
+                    ////
+                    
+                    CurrentUser.cu.readCurrentUserFromDatabase()
+                    {
+                        DispatchQueue.main.async {
+                            self.setCurrentUserLabels()
+                        }
+                        self.setTableView()
+                        self.setImagePicker()
+                        self.setPostsObserver()
+                    }
                 }
+                
             } else {
+                //self.authObservserCompletionInvocationCount = 0
                 self.performSegue(withIdentifier: "segueFeedToLoginVC", sender: nil)
             }
+            self.authObservserCompletionInvocationCount += 1
         }
         
 
     }
-    
-    override func viewDidAppear(_ animated: Bool) {
-//        performSegue(withIdentifier: "segueFeedToCommentsVC", sender: nil)
-    }
-    override func viewWillDisappear(_ animated: Bool) {
-//        print("==[FeedVC].viewWillDisappear : removeAuthStateDidChangeListener \n")
-        FIRAuth.auth()?.removeStateDidChangeListener(authStateDidChangeListenerHandle)
-        removeDBObservers()
-        // what even is better to remove listener? viewWillDisappear or viewDidDisappear
-    }
-    
-    func removeDBObservers(){
-        removePostObsever()
-        removeUserObsever()
-    }
-    
-    func removePostObsever(){
-        if let _ = postsHandle {
-            DataService.ds.REF_POSTS.removeObserver(withHandle: postsHandle)
-        }
-    }
-    
-    func removeUserObsever(){
-        if let _ = usersHandle {
-            DataService.ds.REF_POSTS.removeObserver(withHandle: usersHandle)
-        }
-    }
-    
+
+////////////////////////////////
+//  Seting TableView
+////////////////////////////////
     func setTableView() {
         tableView.delegate = self
         tableView.dataSource = self
@@ -97,11 +90,26 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         refreshControl.addTarget(self, action: #selector(updateTableView), for: UIControlEvents.valueChanged)
         tableView.refreshControl = refreshControl
     }
+
     
-    func setImagePicker() {
-        imagePicker = UIImagePickerController()
-        imagePicker.allowsEditing = true
-        imagePicker.delegate = self
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return posts.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let post = posts[indexPath.row]
+        if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell") as? PostCell {
+            cell.configureCell(post: post)
+            cell.delegate = self
+            return cell
+        } else {
+            return PostCell()
+        }
     }
     
     func updateTableView(){
@@ -109,15 +117,35 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         self.refreshControl.endRefreshing()
     }
     
+    
+////////////////////////////////
+//
+////////////////////////////////
+    func setImagePicker() {
+        imagePicker = UIImagePickerController()
+        imagePicker.allowsEditing = true
+        imagePicker.delegate = self
+    }
+
+    
     func setCurrentUserLabels(){
         userEmailLabel.text = CurrentUser.cu.currentDBUser.email
         displayNameLabel.text = CurrentUser.cu.currentDBUser.userName
         
     }
     
+////////////////////////////////
+//  Reading Current User
+////////////////////////////////
+    
+    var authUserDidChangeCompletionRunCount = 0
+    
     func setAuthObservser(completion: @escaping (_ userAuthenticated: Bool) -> Void) { // listener for auth change (user login/logount)
         
         authStateDidChangeListenerHandle = FIRAuth.auth()?.addStateDidChangeListener { auth, user in
+            
+            self.authUserDidChangeCompletionRunCount += 1
+            print("====[FeedVC].setAuthObservser() -> .auth()?.addStateDidChangeListener COMPLETION  authUserDidChangeCompletionRunCount = \(self.authUserDidChangeCompletionRunCount)\n")
             
             if let user = user { // User is signed in.
 
@@ -149,22 +177,42 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         print("==[FeedVC].setAuthObservser() -> clearCurrentUser() : User logged Out/ not yet logged In: ...Count \(self.stateDidChangeListenerInvocationCount) \n")
     }
     
+////////////////////////////////
+//  Reading posts and users
+////////////////////////////////
+    
+    var postsObserverCompletionInvocationCount = 0
+    
     func setPostsObserver() {
         
-        postsHandle = DataService.ds.REF_POSTS.queryOrdered(byChild: postsOrderedBy).observe(.value, with: { (snapshot) in
-            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
-                self.posts = snapshots.map(self.parseSnapshotToPost)
-                self.setUserObserver(){
-                    self.posts = self.posts.map(self.addUserDataToPost)
-                    self.tableView.reloadData()
+        postsObserverHandle = DataService.ds.REF_POSTS.queryOrdered(byChild: postsOrderedBy).observe(.value, with: { (snapshot) in
+            if self.postsObserverCompletionInvocationCount > 0 {
+                ////
+                
+                print("====[FeedVC].setPostsObserver() { : postsObserverCompletionInvocationCount = \(self.postsObserverCompletionInvocationCount)")
+                ////
+                
+                if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                    self.posts = snapshots.map(self.mapSnapshotToPost)
+                    
+                    ///
+                    self.setUserSingleObserver(){
+                        self.posts = self.posts.map(self.addUserDataToPost)
+                        DispatchQueue.main.async {
+                            self.tableView.reloadData()
+                        }
+                        
+                    }
                 }
             }
+            self.postsObserverCompletionInvocationCount += 1
+            
         }, withCancel: { (error) in
             print("===[FeedVC] DB Error (setupPostsObserver) : \(error)\n")
         })
     }
     
-    func parseSnapshotToPost(snap: FIRDataSnapshot) -> Post {
+    func mapSnapshotToPost(snap: FIRDataSnapshot) -> Post {
         if let postDict = snap.value as? [String : Any] {
             return Post(postKey: snap.key, postData: postDict) // not shure if 3 strings above required
         } else {
@@ -184,10 +232,15 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         return post
     }
     
-    func setUserObserver(completion: @escaping ()-> Void){
-        usersHandle = DataService.ds.REF_USERS.observe(.value, with: { (snapshot) in
+    var userObserverCompletionEnvoked = 0
+    
+    func setUserSingleObserver(completion: @escaping ()-> Void){
+        DataService.ds.REF_USERS.observeSingleEvent(of: .value, with: { (snapshot) in
+            self.userObserverCompletionEnvoked += 1
+            print("====[FeedVC].setUserObserver() { : fuserObserverCompletionEnvoked = \(self.userObserverCompletionEnvoked) \n")
+            
             if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
-                self.users = snapshots.map(self.parseSnapshotToUser)
+                self.users = snapshots.map(self.mapSnapshotToUser)
                 for user in self.users {
                     self.usersDict[user.userKey!] = user
                 }
@@ -199,7 +252,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         })
     }
     
-    func parseSnapshotToUser(snap: FIRDataSnapshot) -> User {
+    func mapSnapshotToUser(snap: FIRDataSnapshot) -> User {
         if let userDict = snap.value as? [String : Any] {
             return User(userKey: snap.key, userData: userDict)
         } else {
@@ -207,30 +260,13 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         }
     }
     
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return posts.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+////////////////////////////////
 
-        let post = posts[indexPath.row]
-        if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell") as? PostCell {
-            cell.configureCell(post: post)
-            cell.delegate = self
-            return cell
-        } else {
-            return PostCell()
-        }
-    }
     
     @IBAction func btnSignOutTapped(_ sender: Any) {
         CurrentUser.cu.currentDBUser = User()
         KeychainWrapper.standard.removeObject(forKey: KEY_UID)
-        removeDBObservers()
+        removePostObserver()
         try! FIRAuth.auth()?.signOut()
     }
     
@@ -250,6 +286,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         self.performSegue(withIdentifier: "segueFeedToCommentsVC", sender: post)
     }
     
+////////////////////////
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "segueFeedToUserVC" {
             if let userVC = segue.destination as? UserVC {
@@ -283,6 +320,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         }
     }
 
+//////////////////////
     @IBAction func sortByTapped(_ sender: UISegmentedControl) {
         let index = sender.selectedSegmentIndex
         switch index {
@@ -293,10 +331,41 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         default:
             postsOrderedBy = "dateOfCreate"
         }
-
-        removePostObsever()
+        
+        // reload snapshot with differen ordering
+        removePostObserver()
         setPostsObserver()
 
     }
 
+    
+////////////////////////////////
+//  Removing listeners
+////////////////////////////////
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        removeAuthObserver()
+        removePostObserver()
+
+    }
+    
+    func removeAuthObserver(){
+        if let handle = authStateDidChangeListenerHandle {
+            FIRAuth.auth()?.removeStateDidChangeListener(handle)
+            authStateDidChangeListenerHandle = nil
+        //self.authObservserCompletionInvocationCount = 0
+        }
+    }
+    
+
+    func removePostObserver(){
+        if let handle = postsObserverHandle {
+            DataService.ds.REF_POSTS.removeObserver(withHandle: handle)
+            postsObserverHandle = nil
+            
+        }
+    }
+    
+/////////////////////
 }

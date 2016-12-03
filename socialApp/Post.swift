@@ -23,6 +23,16 @@ class Post {
     private var _dateOfCreate: Date!
     private var _dateOfUpdate: Date!
     
+    private var _comments : [String : Comment]!
+    
+    var comments: [String : Comment] {
+        get {
+            return _comments
+        } set {
+            _comments = newValue
+        }
+    }
+    
     var caption: String {
         return _caption
     }
@@ -117,8 +127,18 @@ class Post {
             self._dateOfUpdate = Date(timeIntervalSince1970: dateOfUpdate/1000)
         }
         
+        if let commentsDict = postData["comments"] as? [String: Any] {
+           // save comments to post
+        }
+        
         _postRef = DataService.ds.REF_POSTS.child(_postKey)
         
+
+        
+    }
+    
+    func readCommentFromDict() {
+            
     }
     
     func adjustLike(addLike: Bool) {

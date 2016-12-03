@@ -259,13 +259,22 @@
                                             <constraint firstAttribute="trailing" secondItem="qO6-y3-yN4" secondAttribute="trailing" constant="8" id="bpZ-0e-tYj"/>
                                         </constraints>
                                     </view>
+                                    <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="9Ul-OT-AHd">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="553"/>
+                                        <color key="backgroundColor" red="0.40000000000000002" green="0.80000000000000004" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                    </tableView>
                                 </subviews>
+                                <color key="backgroundColor" red="0.01176470588" green="0.76078431369999999" blue="0.63921568630000003" alpha="1" colorSpace="calibratedRGB"/>
                                 <gestureRecognizers/>
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="vi8-MW-AVQ" secondAttribute="bottom" id="18C-xI-OBg"/>
                                     <constraint firstAttribute="trailing" secondItem="vi8-MW-AVQ" secondAttribute="trailing" id="7vB-ub-K7W"/>
+                                    <constraint firstItem="9Ul-OT-AHd" firstAttribute="leading" secondItem="alX-ZE-2Yk" secondAttribute="leading" id="T7L-Bg-aia"/>
+                                    <constraint firstItem="9Ul-OT-AHd" firstAttribute="top" secondItem="alX-ZE-2Yk" secondAttribute="top" id="dSt-nk-voV"/>
                                     <constraint firstItem="vi8-MW-AVQ" firstAttribute="top" secondItem="alX-ZE-2Yk" secondAttribute="top" constant="553" id="m8K-0O-SUA"/>
                                     <constraint firstItem="vi8-MW-AVQ" firstAttribute="leading" secondItem="alX-ZE-2Yk" secondAttribute="leading" id="ozc-I8-iTQ"/>
+                                    <constraint firstAttribute="trailing" secondItem="9Ul-OT-AHd" secondAttribute="trailing" id="qwL-8o-ZTh"/>
+                                    <constraint firstItem="vi8-MW-AVQ" firstAttribute="top" secondItem="9Ul-OT-AHd" secondAttribute="bottom" id="thq-Dk-sVS"/>
                                 </constraints>
                                 <connections>
                                     <outletCollection property="gestureRecognizers" destination="uw8-ly-QPI" appends="YES" id="LKp-Uo-7cU"/>
@@ -287,6 +296,7 @@
                         <outlet property="commentTextField" destination="hdd-9U-RaH" id="T0u-Ua-4Mw"/>
                         <outlet property="postCaptionLabel" destination="kOZ-dY-fE5" id="4Py-zz-l4s"/>
                         <outlet property="scrollView" destination="alX-ZE-2Yk" id="6vX-I3-aZ8"/>
+                        <outlet property="tableView" destination="9Ul-OT-AHd" id="85w-PU-CDj"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="jDr-9O-QCp" userLabel="First Responder" sceneMemberID="firstResponder"/>

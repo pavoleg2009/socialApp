@@ -33,7 +33,7 @@ class PostVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
         case .edit: // if view opened for editing existing Post
             readPostData(){
                 self.configurePostVCForEdit()
-                self.loadPostImage() //{}
+                self.readPostImage() //{}
             }
         default: // if view opened for adding post
             configurePostVCForCreate()
@@ -121,7 +121,7 @@ class PostVC: UIViewController, UIImagePickerControllerDelegate, UINavigationCon
         saveButton.addTarget(self, action: #selector(PostVC.savePostTapped(_:)), for: .touchUpInside)
     }
 
-    func loadPostImage() {
+    func readPostImage() {
         
         if post.imageUrl != "" {
             DataService.ds.readImageFromStorage(imageUrl: post.imageUrl) { (image) in
