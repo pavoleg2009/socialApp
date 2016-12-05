@@ -19,14 +19,9 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     var imageSelected = false
     
     private var authStateDidChangeListenerHandle: FIRAuthStateDidChangeListenerHandle?
-    var postsObserverHandle: UInt?
-//    var usersHandle: UInt!
-    var dbCurrentUserHandle: UInt!
-    
-    var stateDidChangeListenerInvocationCount = 0
+    private var postsObserverHandle: UInt?
     
     var postsOrderedBy : String = "dateOfCreate"
-    
     var refreshControl: UIRefreshControl!
     
     @IBOutlet weak var tableView: UITableView!
@@ -34,10 +29,6 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     @IBOutlet weak var userEmailLabel: UILabel!
     @IBOutlet weak var displayNameLabel: UILabel!
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-    }
     
     var authObservserCompletionInvocationCount = 0
     
@@ -47,14 +38,9 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             if userAutheticated {
                 
                 if self.authObservserCompletionInvocationCount > 0 {
-//!! run only one time
-                   //// 
-                   
                     print("====[FeddVC].viewWillAppear: authObservserCompletionInvocationCount = \(self.authObservserCompletionInvocationCount) \n")
-                    ////
-                    
-                    CurrentUser.cu.readCurrentUserFromDatabase()
-                    {
+ 
+                    CurrentUser.cu.readCurrentUserFromDatabase() {
                         DispatchQueue.main.async {
                             self.setCurrentUserLabels()
                         }
@@ -63,15 +49,12 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
                         self.setPostsObserver()
                     }
                 }
-                
             } else {
                 //self.authObservserCompletionInvocationCount = 0
                 self.performSegue(withIdentifier: "segueFeedToLoginVC", sender: nil)
             }
             self.authObservserCompletionInvocationCount += 1
         }
-        
-
     }
 
 ////////////////////////////////
@@ -138,28 +121,19 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
 //  Reading Current User
 ////////////////////////////////
     
-    var authUserDidChangeCompletionRunCount = 0
-    
     func setAuthObservser(completion: @escaping (_ userAuthenticated: Bool) -> Void) { // listener for auth change (user login/logount)
         
-        authStateDidChangeListenerHandle = FIRAuth.auth()?.addStateDidChangeListener { auth, user in
-            
-            self.authUserDidChangeCompletionRunCount += 1
-            print("====[FeedVC].setAuthObservser() -> .auth()?.addStateDidChangeListener COMPLETION  authUserDidChangeCompletionRunCount = \(self.authUserDidChangeCompletionRunCount)\n")
+        authStateDidChangeListenerHandle = FIRAuth.auth()?.addStateDidChangeListener {  auth, user in
             
             if let user = user { // User is signed in.
-
                 self.setLocalCurrentUser(user: user)
                 completion(true)
                 
-            } else {
-                // No user is signed in.
+            } else {// No user is signed in.
                 self.clearLocalCurrentUser()
                 completion(false)
                 self.userEmailLabel.text = "No user logged / not yet logged in"
             }
-            
-            self.stateDidChangeListenerInvocationCount += 1
         }
     }
     
@@ -167,14 +141,12 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         CurrentUser.cu.currentFIRUser = user
         CurrentUser.cu.REF_USER_CURRENT = DataService.ds.REF_USERS.child(user.uid)
         CurrentUser.cu.writeFIRUserDataToCurrenDBUser()
-        print("==[FeedVC].setAuthObservser() : User logged In : ...Count \(self.stateDidChangeListenerInvocationCount) \n")
     }
     
     func clearLocalCurrentUser(){
         CurrentUser.cu.currentFIRUser = nil
         CurrentUser.cu.REF_USER_CURRENT = nil
         CurrentUser.cu.currentDBUser = nil
-        print("==[FeedVC].setAuthObservser() -> clearCurrentUser() : User logged Out/ not yet logged In: ...Count \(self.stateDidChangeListenerInvocationCount) \n")
     }
     
 ////////////////////////////////
@@ -185,31 +157,25 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
     
     func setPostsObserver() {
         
-        postsObserverHandle = DataService.ds.REF_POSTS.queryOrdered(byChild: postsOrderedBy).observe(.value, with: { (snapshot) in
-            if self.postsObserverCompletionInvocationCount > 0 {
-                ////
-                
-                print("====[FeedVC].setPostsObserver() { : postsObserverCompletionInvocationCount = \(self.postsObserverCompletionInvocationCount)")
-                ////
-                
-                if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
-                    self.posts = snapshots.map(self.mapSnapshotToPost)
-                    
-                    ///
-                    self.setUserSingleObserver(){
-                        self.posts = self.posts.map(self.addUserDataToPost)
-                        DispatchQueue.main.async {
-                            self.tableView.reloadData()
-                        }
+        if postsObserverHandle == nil {
+            postsObserverHandle = DataService.ds.REF_POSTS.queryOrdered(byChild: postsOrderedBy).observe(.value, with: { (snapshot) in
+                    if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                        self.posts = snapshots.map(self.mapSnapshotToPost)
                         
+                        ///
+                        self.setUserSingleObserver(){
+                            self.posts = self.posts.map(self.addUserDataToPost)
+                            DispatchQueue.main.async {
+                                self.tableView.reloadData()
+                            }
+                        }
                     }
-                }
-            }
-            self.postsObserverCompletionInvocationCount += 1
-            
-        }, withCancel: { (error) in
-            print("===[FeedVC] DB Error (setupPostsObserver) : \(error)\n")
-        })
+
+                
+            }, withCancel: { (error) in
+                print("===[FeedVC] DB Error (setupPostsObserver) : \(error)\n")
+            })
+        }
     }
     
     func mapSnapshotToPost(snap: FIRDataSnapshot) -> Post {
@@ -232,13 +198,9 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         return post
     }
     
-    var userObserverCompletionEnvoked = 0
-    
     func setUserSingleObserver(completion: @escaping ()-> Void){
         DataService.ds.REF_USERS.observeSingleEvent(of: .value, with: { (snapshot) in
-            self.userObserverCompletionEnvoked += 1
-            print("====[FeedVC].setUserObserver() { : fuserObserverCompletionEnvoked = \(self.userObserverCompletionEnvoked) \n")
-            
+           
             if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 self.users = snapshots.map(self.mapSnapshotToUser)
                 for user in self.users {
@@ -308,7 +270,7 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         }
         
         if segue.identifier == "segueFeedToCommentsVC" {
-            print("===[FeedVC].prepareForSegue : segueFeedToCommentsVC")
+
             if let commentsVC = segue.destination as? CommentsVC {
                 if let post = sender as? Post {
                     commentsVC.post = post
@@ -367,5 +329,9 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         }
     }
     
+    @IBAction func testBtnTapped(_ sender: Any) {
+        print("=== Test\n")
+        
+    }
 /////////////////////
 }

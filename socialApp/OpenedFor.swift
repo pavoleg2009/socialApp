@@ -11,4 +11,5 @@ import Foundation
 enum OpenedFor {
     case create
     case edit
+    case none
 }

@@ -79,10 +79,8 @@ class LoginVC: UIViewController, GIDSignInUIDelegate {
             if error != nil {
                 print("===[LoginVC].firebaseAuth(FIRAuth.auth()?.signIn completion): Error! Unable to authenticate with Facebook account in Firebase - \(error) \n")
             } else {
-//                print("==[LoginVC].firebaseAuth(FIRAuth.auth()?.signIn completion): Successfully authenticated with Facebook account in Firebase \n")
                 if let gIdUser = gIdUser {
                     self.completeSignIn(id: gIdUser.uid, userData: ["provider": credential.provider])
-                    print("====[LoginVC].firebaseAuth(FIRAuth.auth()?.signIn completion): credential.provider] = \(credential.provider) \n")
                 }
             }
         })

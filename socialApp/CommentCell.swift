@@ -96,6 +96,16 @@ class CommentCell: UITableViewCell {
             })
         }
         
+        // check if current comment made by currentUser (and both UIDs present)
+        if comment.currentUserIsAuthor {
+//            let tempColor = self.backgroundColor
+//            print("=====\(tempColor.)\n")
+            self.backgroundColor = UIColor.lightGray
+        } else {
+            self.backgroundColor = UIColor.clear
+        }
         
     }
+    
+    
 }

@@ -22,7 +22,9 @@ class Comment {
     private var _dateOfUpdate: Date!    
 //    private var _imageUrl: String!
 //    private var _likes: Int!
-
+    
+    private var _currentUserIsAuthor: Bool = false
+    
     var commentKey: String? {
         get {
             return _commentKey
@@ -39,7 +41,7 @@ class Comment {
         }
     }
     
-    var authorKey: String {
+    var authorKey: String? {
         get {
             return _authorKey ?? ""
         } set {
@@ -80,11 +82,18 @@ class Comment {
         }
     }
     
+    var currentUserIsAuthor: Bool {
+        get {
+            return _currentUserIsAuthor
+        } 
+    }
+    
+    
     init() {
         self._commentKey = ""
     }
     
-    init(commentKey: String, commentData: [String: Any]) {
+    init(postKey: String, commentKey: String, commentData: [String: Any]) {
         
         self._commentKey = commentKey
         
@@ -98,6 +107,10 @@ class Comment {
         
         if let authorKey = commentData["authorKey"] as? String {
             self._authorKey = authorKey
+            
+            if let currentUid = CurrentUser.cu.uid {
+                self._currentUserIsAuthor = (currentUid == authorKey)
+            }
         }
         
         if let dateOfCreate = commentData["dateOfCreate"]  as? TimeInterval {
@@ -107,6 +120,7 @@ class Comment {
         if let dateOfUpdate = commentData["dateOfUpdate"]  as? TimeInterval {
             self._dateOfUpdate = Date(timeIntervalSince1970: dateOfUpdate/1000)
         }
+        
         
     }
 
