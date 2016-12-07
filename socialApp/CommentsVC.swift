@@ -15,11 +15,30 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
     var post: Post!
     var users = [User]()
     var usersDict: Dictionary<String, User> = [:]
-    var commentsHandle: FIRDatabaseHandle!
-    var commentsOrderedByChild: String = "dateOfCreate"
-    var commentsArray = [Comment]()
-    var cellId = "commentCellId"
-    var commentTextFieldFocusedFor: OpenedFor = .none
+    
+    private var commentsHandle: FIRDatabaseHandle!
+    private var commentsOrderedByChild: String = "dateOfCreate"
+    private var commentsArray = [Comment]()
+    private var cellId = "commentCellId"
+    private var _commentTextFieldFocusedFor: OpenedFor = .none
+    
+    private var editingComment: Comment?
+    
+    var commentTextFieldFocusedFor: OpenedFor {
+        get {
+            return _commentTextFieldFocusedFor
+        } set {
+            _commentTextFieldFocusedFor = newValue
+            switch _commentTextFieldFocusedFor {
+            case .create:
+                postCaptionLabel.text = ">New Comment<"
+            case .edit:
+                postCaptionLabel.text = ">Edit Comment<"
+            default:
+                postCaptionLabel.text = post.caption
+            }
+        }
+    }
     
     @IBOutlet weak var postCaptionLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
@@ -34,12 +53,13 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
         super.viewDidLoad()
         
         commentTextField.delegate = self
-        
+        //handle keyboard shwowing/hiding
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillChangeRect), name: .UIKeyboardWillChangeFrame, object: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         setReturnButton(setFor: commentTextFieldFocusedFor)
+        commentTextField.clearButtonMode = .whileEditing
         if post != nil {
             setTableView()
             postCaptionLabel.text = post.caption
@@ -47,48 +67,11 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                     self.tableViewScrollToBottom()
-                    
                 }
             }
         }
     }
-///////////////////////////
-//  setting button responsive to captionText state and create/edit option
-///////////////////////////
 
-    func setReturnButton(setFor: OpenedFor){
-        
-        switch setFor {
-        case .create:
-            setReturnButtonForCreate()
-        case .edit:
-            setReturnButtonForUpdate()
-        default:
-            setReturnButtonForNone()
-            
-        }
-
-    }
-    
-    func setReturnButtonForCreate(){
-        returnButton.setTitle("Send", for: UIControlState.normal)
-        returnButton.addTarget(self, action: #selector(onReturnButtonTappedForCreate(_:)), for: .touchUpInside)
-        returnButton.backgroundColor = UIColor.blue
-        
-    }
-    func setReturnButtonForUpdate(){
-        returnButton.setTitle("Save", for: UIControlState.normal)
-        returnButton.addTarget(self, action: #selector(onReturnButtonTappedForUpdate(_:)), for: .touchUpInside)
-        returnButton.backgroundColor = UIColor.orange
-    }
-    
-    func setReturnButtonForNone(){
-        returnButton.setTitle("===", for: UIControlState.normal)
-        returnButton.backgroundColor = nil
-    }
-    
-
-    
 ////////////////////////////////
 //  Setting tableView
 ////////////////////////////////
@@ -121,40 +104,33 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
     
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         // to allow swipe and show Edit and Delete button for author of comment
-        if commentTextField.isEditing {
-            cancelCommentEditig()
-        }
-        return commentsArray[indexPath.row].currentUserIsAuthor
+        return !(commentTextField.isEditing) && (commentsArray[indexPath.row].currentUserIsAuthor)
+        //        return (tableView.cellForRow(at: indexPath) as! CommentCell).comment.currentUserIsAuthor
     }
     
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-        // set actions to edit and delete row
         let editAction = UITableViewRowAction(style: .normal, title: " Edit    ") { (tableViewRowAction, indexPath) in
             self.commentStartEditingAt(indexPath)
         }
         editAction.backgroundColor = UIColor.blue
 
         let deleteAction = UITableViewRowAction(style: .destructive, title: "Delete") { (tableViewRowAction, indexPath) in
-        
             self.deleteComment(indexPath)
         }
         
         return [deleteAction, editAction]
     }
     
-//    var editingCellIndexPath: IndexPath!
-//    
-//    func tableView(_ tableView: UITableView, willBeginEditingRowAt indexPath: IndexPath) {
-//        editingCellIndexPath = indexPath
-//    }
-    
     func tableView(_ tableView: UITableView, didEndEditingRowAt indexPath: IndexPath?) {
         finishCommentEditing()
+        editingComment = nil
     }
     
     func tableViewScrollToBottom() {
-        let indexPath = IndexPath(row: self.tableView.numberOfRows(inSection: 0)-1, section: 0)
-        self.tableView.scrollToRow(at: indexPath , at: UITableViewScrollPosition.bottom, animated: false)
+        if tableView.numberOfRows(inSection: 0) > 1 {
+            let indexPath = IndexPath(row: self.tableView.numberOfRows(inSection: 0)-1, section: 0)
+            self.tableView.scrollToRow(at: indexPath , at: UITableViewScrollPosition.bottom, animated: false)
+        }
     }
     
 ////////////////////////////////
@@ -200,18 +176,30 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
         }
     }
 
-    @IBAction func commentTextFieldEditingChanged(_ sender: Any) {
+    @IBAction func commentTextFieldEditingChanged(_ sender: UITextField) {
         // change button after some small delay
-        if let str = commentTextField.text, str != "" {
-            setReturnButton(setFor: commentTextFieldFocusedFor)
-        } else {
+        if commentTextField.text == "" || (commentTextFieldFocusedFor == .edit && commentTextField.text == editingComment?.caption) {
             setReturnButton(setFor: .none)
         }
     }
+
     
-    func textFieldDidEndEditing(_ textField: UITextField, reason: UITextFieldDidEndEditingReason) {
-        textField.resignFirstResponder()
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        if textField.isEqual(commentTextField) {
+            
+            if (textField.text == "" && string != "") || (commentTextFieldFocusedFor == .edit && textField.text == editingComment?.caption) {
+                setReturnButton(setFor: commentTextFieldFocusedFor)
+            }
+        }
+        return true
     }
+    
+    @IBAction func commetnTextFieldEditingDidEnd(_ sender: UITextField) {
+        if commentTextField.text == "" {
+            finishCommentEditing()
+        }
+    }
+    
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField.isEqual(commentTextField) {
@@ -220,50 +208,66 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
         return true
     }
     
-    @IBAction func commetTextFieldValueChanged(_ sender: UITextField) {
-        print("===== commetTextFieldValueChanged")
-
+///////////////////////////
+//  setting button responsive to captionText state and create/edit option
+///////////////////////////
+    
+    func setReturnButton(setFor: OpenedFor){
+        
+        switch setFor {
+        case .create:
+            setReturnButtonForCreate()
+        case .edit:
+            setReturnButtonForUpdate()
+        default:
+            setReturnButtonForNone()
+        }
     }
     
-///////
+    func setReturnButtonForCreate(){
+        returnButton.setTitle("+", for: UIControlState.normal)
+        returnButton.removeTarget(nil, action: nil, for: .touchUpInside)
+        returnButton.addTarget(self, action: #selector(onReturnButtonTappedForCreate(_:)), for: .touchUpInside)
+        returnButton.backgroundColor = UIColor.blue
+        
+    }
+    func setReturnButtonForUpdate(){
+        returnButton.setTitle("√", for: UIControlState.normal)
+        returnButton.removeTarget(nil, action: nil, for: .touchUpInside)
+        returnButton.addTarget(self, action: #selector(onReturnButtonTappedForUpdate(_:)), for: .touchUpInside)
+        returnButton.backgroundColor = UIColor.orange
+    }
+    
+    func setReturnButtonForNone(){
+        returnButton.setTitle("…", for: UIControlState.normal)
+        returnButton.removeTarget(nil, action: nil, for: .touchUpInside)
+        returnButton.backgroundColor = nil
+    }
     
     
 ////////////////////////////////
 //  Creating new comment
 ////////////////////////////////
     func onReturnButtonTappedForCreate(_ sender: Any) {
-        sendComment()
+        createComment()
     }
 
-    func sendComment() {
-        if let commentText = commentTextField.text, commentText != "" {
-            saveCommentToDB(commentText)
-            finishCommentEditing()
-            
-            
-            //commentTextField.resignFirstResponder() 
-//            tableView.reloadData()
-
-        }
-
-    }
-    
-    func saveCommentToDB(_ commentText: String?){
+    func createComment() {
         
-        if commentText != nil {
-            prepareCommentData(commentText: commentText!){ (newCommentRef, newCommentData) in
+        if let commentText = commentTextField.text, commentText != "" {
+            
+            prepareCommentDataForCreate(commentText: commentText){ (newCommentRef, newCommentData) in
                 self.createCommentInDb(commentRef: newCommentRef, commentData: newCommentData) {
                     
-                    print("====== comment Created with key \(newCommentRef.key)\n")
                 }
-
             }
+            finishCommentEditing()
         }
     }
+
     
-    
-    
-    func prepareCommentData(commentText: String, completion: @escaping (_ firebaseCommentRef: FIRDatabaseReference, _ commentData: [String : Any])->Void){
+    func prepareCommentDataForCreate(commentText: String, completion: @escaping (_ firebaseCommentRef: FIRDatabaseReference, _ commentData: [String : Any])->Void){
+        
         let newCommentData: [String: Any] = [
             "caption" : commentText,
             "likes" : 0,
@@ -284,7 +288,7 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
                 print("===[CommentsVC].createCommentinDb : ERROR creating comment in Firebase DB\(err.debugDescription)\n")
                 return
             } else {
-                print("==[CommentsVC].createCommentinDb : Comment created in : \(ref.key)\n")
+//                print("==[CommentsVC].createCommentinDb : Comment created in : \(ref.key)\n")
             }
         }
     }
@@ -294,6 +298,7 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
         commentTextFieldFocusedFor = .none
         setReturnButton(setFor: .none)
         commentTextField.text = ""
+        postCaptionLabel.text = post.caption
         // nay be this line is enough
         commentTextField.endEditing(true)
     }
@@ -311,8 +316,6 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
                     self.commentsArray = self.commentsArray.map(self.addUserDataToComment)
                     completion()
                 }
-                
-                
             } else {
                 completion()
             }
@@ -346,7 +349,7 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
             }
             
         }, withCancel: { (error) in
-            print("===[FeedVC] DB Error (setupPostsObserver) !! : \(error)\n")
+            print("===[CommentVC] DB Error (setUserSingleObserver) !! : \(error)\n")
             completion()
         })
     }
@@ -375,31 +378,56 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
 //  Update Comment - only text and dateOfUpdate
 ////////////////////////////////
     
-
-    
     func commentStartEditingAt(_ indexPath: IndexPath){
         
-        let comment = commentsArray[indexPath.row]
-        // set commentText to commentEdit
-        commentTextField.text = comment.caption
-        commentTextFieldFocusedFor = .edit
-        commentTextField.becomeFirstResponder()
-        
-        
-        print("==== Edit Item \(comment.caption)\n")
-        // enforce editing
-        // change action for send button return keybord to UpdateComment
-        
+        if let comment = (tableView.cellForRow(at: indexPath) as! CommentCell).comment {
+            // set commentText to commentEdit
+            editingComment = comment
+            commentTextField.text = comment.caption
+            commentTextFieldFocusedFor = .edit
+            setReturnButton(setFor: .none)
+            commentTextField.becomeFirstResponder()
+        }
     }
-    
-    func updateCommentInDb(){
-        
-    }
+
     
     func onReturnButtonTappedForUpdate(_ sender: Any){
-        print("===== onReturnButtonTappedForUpdate\n")
+        updateComment()
     }
     
+    func updateComment(){
+    
+        if let newCommentCaptoion = commentTextField.text, let comment = editingComment, newCommentCaptoion != "" && tableView.isEditing && editingComment != nil {
+            
+            prepareCommentDataForUpdate(commentForUpdate: comment, commentCaption: newCommentCaptoion) { (updCommentRef, updCommentData) in
+                self.updateCommentInDb(commentToUpdate: updCommentRef, updData: updCommentData)
+            }
+        editingComment = nil
+        }
+    }
+    
+    func prepareCommentDataForUpdate(commentForUpdate: Comment, commentCaption: String, completion: @escaping (_ firebaseCommentRef: FIRDatabaseReference, _ commentData: [String : Any])->Void){
+        
+        let updCommentData: [String: Any] = [
+            "caption" : commentCaption,
+            "dateOfUpdate": [".sv": "timestamp"]
+        ]
+        
+        let updCommentRef = DataService.ds.REF_POSTS.child("\(post.postKey)/comments").child(commentForUpdate.commentKey!)
+        
+        completion(updCommentRef, updCommentData)
+        
+    }
+
+    
+    func updateCommentInDb(commentToUpdate: FIRDatabaseReference, updData: [String: Any]){
+        
+        commentToUpdate.updateChildValues(updData) { (error, ref) in
+            if error != nil {
+                print("===[CommentVC].updateCommentInDb() ERROR updating comment \n")
+            }
+        }
+    }    
     
     @IBAction func viewTappedForCancelEditing(_ sender: Any) {
         cancelCommentEditig()
@@ -419,7 +447,7 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
        
         let cellToDelete = tableView.cellForRow(at: indexPath) as! CommentCell
         
-        if let commentKeyToDelete = cellToDelete.comment.commentKey {
+        if let commentKeyToDelete = cellToDelete.comment.commentKey, !commentTextField.isEditing {
             DataService.ds.REF_POSTS.child("\(post.postKey)/comments/\(commentKeyToDelete)").removeValue() { (error, ref) in
                 if error != nil {
                     print("===[CommentVC].deleteComment() : ERROR : \(error.debugDescription) \n")
@@ -427,12 +455,6 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
                 self.tableView.reloadData()
             }
         }
-        
-        
-        // tableView cancel editind
-        
-        
-        
     }
     
 ////////////////////////////////
@@ -441,14 +463,12 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
     
     override func viewWillDisappear(_ animated: Bool) {
         removeCommentsObserver()
-        
     }
     
     func removeCommentsObserver(){
         if let _ = commentsHandle {
             DataService.ds.REF_POSTS.removeObserver(withHandle: commentsHandle)
         }
-        
     }
     
     deinit {
@@ -462,6 +482,7 @@ class CommentsVC: UIViewController, UITextFieldDelegate, UITableViewDelegate, UI
     
     @IBAction func testButtonClick(_ sender: Any) {
         
+//        print(returnButton.allControlEvents.)
         
     }
     

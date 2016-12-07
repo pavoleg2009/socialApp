@@ -246,28 +246,28 @@
                             </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="9Ul-OT-AHd">
                                 <rect key="frame" x="0.0" y="65" width="375" height="552"/>
-                                <color key="backgroundColor" red="0.40000000000000002" green="0.80000000000000004" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </tableView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vi8-MW-AVQ">
                                 <rect key="frame" x="0.0" y="617" width="375" height="50"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qO6-y3-yN4">
-                                        <rect key="frame" x="317" y="8" width="50" height="34"/>
+                                        <rect key="frame" x="333" y="8" width="34" height="34"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="50" id="kgZ-zj-L4H"/>
+                                            <constraint firstAttribute="width" constant="34" id="kgZ-zj-L4H"/>
                                         </constraints>
                                         <state key="normal" title="---">
                                             <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                         </state>
                                     </button>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="hdd-9U-RaH">
-                                        <rect key="frame" x="8" y="8" width="301" height="34"/>
+                                        <rect key="frame" x="8" y="8" width="317" height="34"/>
                                         <nil key="textColor"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits"/>
                                         <connections>
-                                            <action selector="commentTextFieldEditingChanged:" destination="b3E-1F-uP8" eventType="editingChanged" id="6Ps-xJ-drS"/>
-                                            <action selector="commetTextFieldValueChanged:" destination="b3E-1F-uP8" eventType="valueChanged" id="O1g-gZ-P8C"/>
+                                            <action selector="commentTextFieldEditingChanged:" destination="b3E-1F-uP8" eventType="editingChanged" id="6EH-3f-5TG"/>
+                                            <action selector="commetnTextFieldEditingDidEnd:" destination="b3E-1F-uP8" eventType="editingDidEnd" id="FLc-tw-htf"/>
                                         </connections>
                                     </textField>
                                 </subviews>
@@ -532,7 +532,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uHG-lc-jQB" customClass="GID">
-                                        <rect key="frame" x="118" y="0.0" width="100" height="100"/>
+                                        <rect key="frame" x="117.5" y="0.0" width="100" height="100"/>
                                         <color key="backgroundColor" red="0.68162685632705688" green="0.23205280303955078" blue="0.17476779222488403" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="100" id="QwC-Ey-vtK"/>
