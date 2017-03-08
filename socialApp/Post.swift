@@ -127,9 +127,9 @@ class Post {
             self._dateOfUpdate = Date(timeIntervalSince1970: dateOfUpdate/1000)
         }
         
-        if let commentsDict = postData["comments"] as? [String: Any] {
-           // save comments to post
-        }
+//        if let commentsDict = postData["comments"] as? [String: Any] {
+//           // save comments to post
+//        }
         
         _postRef = DataService.ds.REF_POSTS.child(_postKey)
         
